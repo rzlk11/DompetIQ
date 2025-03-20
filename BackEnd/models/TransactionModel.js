@@ -1,10 +1,11 @@
 import { Sequelize } from "sequelize";
 import db from "../config/Database.js";
+import Users from "./UserModel.js";
 
 const { DataTypes } = Sequelize;
 
-const Users = db.define(
-  "users",
+const Transactions = db.define(
+  "transactions",
   {
     uuid: {
       type: DataTypes.STRING,
@@ -14,28 +15,33 @@ const Users = db.define(
         notEmpty: true,
       },
     },
-    username: {
-      type: DataTypes.STRING,
+    category_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
       validate: {
         notEmpty: true,
-        len: [3, 100],
       },
     },
-    email: {
-      type: DataTypes.STRING,
+    amount: {
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
       validate: {
         notEmpty: true,
-        isEmail: true,
       },
     },
-    password: {
-      type: DataTypes.STRING,
+    is_scheduled: {
+      type: DataTypes.BOOLEAN,
       allowNull: false,
       validate: {
         notEmpty: true,
-        len: [8, 100],
+      },
+    },
+    timestamp: {
+      type: DataTypes.DATE,
+      defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
+      allowNull: false,
+      validate: {
+        notEmpty: true,
       },
     },
   },
@@ -44,4 +50,7 @@ const Users = db.define(
   }
 );
 
-export default Users;
+Users.hasMany(Transactions);
+Transactions.belongsTo(Users);
+
+export default Transactions;

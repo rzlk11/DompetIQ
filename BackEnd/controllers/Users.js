@@ -51,11 +51,13 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res) => {
   const user = await Users.findOne({
     where: {
-    uuid: req.params.id,
-    }
+      uuid: req.params.id,
+    },
   });
   if (!user) {
-    return res.status(404).json({ error: `User with id: ${req.params.id} not found` });
+    return res
+      .status(404)
+      .json({ error: `User with id: ${req.params.id} not found` });
   }
   const { username, email, password, confPassword } = req.body;
   let hashedPassword;
@@ -89,14 +91,14 @@ export const deleteUser = async (req, res) => {
     where: { uuid: req.params.id },
   });
   if (!user) {
-    return res.status(404).json({ error: `User with id: ${req.params.id} not found` });
+    return res
+      .status(404)
+      .json({ error: `User with id: ${req.params.id} not found` });
   }
   try {
-    await Users.destroy(
-      {
-        where: { uuid: req.params.id },
-      }
-    );
+    await Users.destroy({
+      where: { uuid: req.params.id },
+    });
     res.status(200).json("User deleted");
   } catch (error) {
     res.status(500).json({ error: error.message });

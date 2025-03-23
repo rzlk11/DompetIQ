@@ -35,7 +35,7 @@ export const PreferencesSection = () => {
   ];
 
   return (
-    <Box sx={{ width: 212, height: 351 }}>
+    <Box sx={{ width: 220, height: 530 }}>
       <Card
         sx={{ height: "100%", boxShadow: "0px 0px 14px rgba(0, 0, 0, 0.06)" }}
       >
@@ -112,39 +112,53 @@ export const PreferencesSection = () => {
                 }}
               >
                 Kategori
-              </Typography>
-              <Select
-                displayEmpty
-                size="small"
-                IconComponent={KeyboardArrowDownIcon}
-                sx={{
-                  height: 30,
-                  fontSize: 10,
-                  fontFamily: "'Poppins', Helvetica",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#d6e4ec",
-                  },
-                }}
-              >
-                <MenuItem value="">
-                  <Typography sx={{ fontSize: 10 }}>{""}</Typography>
-                </MenuItem>
-              </Select>
-            </FormControl>
-
-            {/* Account Field */}
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <Typography
-                variant="overline"
-                sx={{
-                  fontFamily: "'Inter', Helvetica",
-                  fontWeight: 600,
-                  fontSize: 10,
-                  letterSpacing: "0.5px",
-                  color: "primary.dark.500",
-                  mb: 0.5,
-                }}
-              >
+                <FormControl fullWidth sx={{ mb: 2 }}>
+  <Typography
+    variant="overline"
+    sx={{
+      fontFamily: "'Inter', Helvetica",
+      fontWeight: 600,
+      fontSize: 10,
+      letterSpacing: "0.5px",
+      color: "primary.dark.500",
+      mb: 0.5,
+    }}
+  >
+    Kategori
+  </Typography>
+  <Select
+    displayEmpty
+    size="small"
+    IconComponent={KeyboardArrowDownIcon}
+    sx={{
+      height: 30,
+      fontSize: 10,
+      fontFamily: "'Poppins', Helvetica",
+      "& .MuiOutlinedInput-notchedOutline": {
+        borderColor: "#d6e4ec",
+      },
+    }}
+  >
+    <MenuItem value="">
+      <Typography sx={{ fontSize: 10 }}>Pilih Kategori</Typography>
+    </MenuItem>
+    <MenuItem value="makanan">
+      <Typography sx={{ fontSize: 10 }}>Makanan</Typography>
+    </MenuItem>
+    <MenuItem value="transportasi">
+      <Typography sx={{ fontSize: 10 }}>Transportasi</Typography>
+    </MenuItem>
+    <MenuItem value="hiburan">
+      <Typography sx={{ fontSize: 10 }}>Hiburan</Typography>
+    </MenuItem>
+    <MenuItem value="tagihan">
+      <Typography sx={{ fontSize: 10 }}>Tagihan</Typography>
+    </MenuItem>
+    <MenuItem value="investasi">
+      <Typography sx={{ fontSize: 10 }}>Investasi</Typography>
+    </MenuItem>
+  </Select>
+</FormControl>
                 Rekening
               </Typography>
               <Select

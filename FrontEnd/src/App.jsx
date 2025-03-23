@@ -1,105 +1,41 @@
-import { useState } from "react";
-import TransactionForm from "./components/TransactionForm";
-import TransactionList from "./components/TransactionList";
-import Sidebar, { SidebarItem } from "./components/Sidebar";
-import { LifeBuoy, Settings } from "lucide-react";
-import DashboardIcon from "@mui/icons-material/Dashboard";
-import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import ScheduleIcon from "@mui/icons-material/Schedule";
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import LandingPage from "./components/LandingPage";
+import Sidebar from "./components/Sidebar";
+import Dashboard from "./pages/Dashboard";
+import KategoriPemasukan from "./pages/KategoriPemasukan";
+import TransaksiTerjadwal from "./pages/TransaksiTerjadwal";
+import TransaksiPage from "./pages/Transaksi"; // Tambahkan impor untuk TransaksiPage
+import HalamanTransaksi from "./pages/Transaksi";
+import { PengeluaranBaru } from "./pages/PengeluaranBaru/PengeluaranBaru";
+import { PemasukanBaru } from "./pages/PemasukanBaru/PemasukanBaru"; // Tambahkan impor untuk PemasukanBaru
+
+
+
+// Layout agar Sidebar selalu muncul
+const Layout = ({ children }) => (
+  <div className="flex">
+    {/* Sidebar */}
+    <Sidebar />
+    {/* Konten Utama */}
+    <div className="ml-60 p-6 bg-gray-100 min-h-screen w-full overflow-y-auto">
+      {children}
+    </div>
+  </div>
+);
 
 function App() {
-  const [activePage, setActivePage] = useState("Dashboard");
-
-  const renderContent = () => {
-    switch (activePage) {
-      case "Dashboard":
-        return (
-          <div className="flex flex-col md:flex-row">
-            <div className="w-full md:w-2/3">
-              <TransactionList />
-            </div>
-            <div className="w-full md:w-1/3">
-              <TransactionForm />
-            </div>
-          </div>
-        );
-      case "Transaksi":
-        return <h1 className="text-xl font-bold">Halaman Transaksi</h1>;
-      case "Rekening":
-        return <h1 className="text-xl font-bold">Halaman Rekening</h1>;
-      case "Transaksi Terjadwal":
-        return <h1 className="text-xl font-bold">Halaman Transaksi Terjadwal</h1>;
-      case "Anggaran":
-        return <h1 className="text-xl font-bold">Halaman Anggaran</h1>;
-      case "Kalender":
-        return <h1 className="text-xl font-bold">Halaman Kalender</h1>;
-      default:
-        return <h1 className="text-xl font-bold">Halaman Tidak Ditemukan</h1>;
-    }
-  };
-
   return (
-    <div className="flex">
-      <Sidebar>
-        <SidebarItem
-          icon={<DashboardIcon size={20} />}
-          text="Dashboard"
-          active={activePage === "Dashboard"}
-          onClick={() => setActivePage("Dashboard")}
-        />
-        <SidebarItem
-          icon={<AccountBalanceIcon size={20} />}
-          text="Rekening"
-          active={activePage === "Rekening"}
-          onClick={() => setActivePage("Rekening")}
-        />
-        <SidebarItem
-          icon={<ReceiptLongIcon size={20} />}
-          text="Transaksi"
-          active={activePage === "Transaksi"}
-          onClick={() => setActivePage("Transaksi")}
-        />
-        <SidebarItem
-          icon={<ScheduleIcon size={20} />}
-          text="Transaksi Terjadwal"
-          active={activePage === "Transaksi Terjadwal"}
-          onClick={() => setActivePage("Transaksi Terjadwal")}
-        />
-        <SidebarItem
-          icon={<AccountBalanceWalletIcon size={20} />}
-          text="Anggaran"
-          active={activePage === "Anggaran"}
-          onClick={() => setActivePage("Anggaran")}
-        />
-        <SidebarItem
-          icon={<CalendarMonthIcon size={20} />}
-          text="Kalender"
-          active={activePage === "Kalender"}
-          onClick={() => setActivePage("Kalender")}
-        />
-        <hr className="my-3" />
-        <h4 className="font-bold text-lg">Preferensi</h4>
-        <SidebarItem
-          icon={<Settings size={20} />}
-          text="Export PDF File"
-          onClick={() => console.log("Export PDF File clicked")}
-        />
-        <SidebarItem
-          icon={<LifeBuoy size={20} />}
-          text="Pengelolaan Kategori"
-          onClick={() => console.log("Pengelolaan Kategori clicked")}
-        />
-        <SidebarItem
-          icon={<Settings size={20} />}
-          text="Pengaturan"
-          onClick={() => console.log("Pengaturan clicked")}
-        />
-      </Sidebar>
-      <div className="flex-1 p-8 bg-gray-100">{renderContent()}</div>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/dashboard" element={<Layout><Dashboard /></Layout>} />
+        <Route path="/pengelolaan-kategori" element={<Layout><KategoriPemasukan /></Layout>} />
+        <Route path="/transaksi-terjadwal" element={<Layout><TransaksiTerjadwal /></Layout>} />
+        <Route path="/transaksi" element={<Layout><TransaksiPage /></Layout>} /> {/* Tambahkan rute ini */}
+        <Route path="/pengeluaran-baru" element={<PengeluaranBaru />} />
+        <Route path="/pemasukan-baru" element={<PemasukanBaru />} /> {/* Tambahkan rute ini */}
+      </Routes>
+    </Router>
   );
 }
 

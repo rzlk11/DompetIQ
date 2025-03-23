@@ -13,14 +13,14 @@ import {
 } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
-export const PengeluaranBaru = ({ open, onClose }) => {
+export const PemasukanBaru = ({ open, onClose }) => {
     const [formData, setFormData] = useState({
         category: "",
         amount: "",
         account: "Dompet",
         date: "22/04/2025",
         time: "23:59",
-        purpose: "",
+        source: "",
         notes: "",
     });
 
@@ -30,7 +30,7 @@ export const PengeluaranBaru = ({ open, onClose }) => {
     };
 
     const handleSave = () => {
-        console.log("Saving pengeluaran:", formData);
+        console.log("Saving data...", formData);
         onClose();
     };
 
@@ -50,7 +50,7 @@ export const PengeluaranBaru = ({ open, onClose }) => {
                 }}
             >
                 <Typography variant="h6" fontWeight="bold" color="#292929" mb={4}>
-                    Pengeluaran Baru
+                    Pemasukan Baru
                 </Typography>
 
                 <Stack spacing={3}>
@@ -70,7 +70,7 @@ export const PengeluaranBaru = ({ open, onClose }) => {
                             </MenuItem>
                         </Select>
                     </FormControl>
-
+                    
                     <TextField
                         name="amount"
                         value={formData.amount}
@@ -96,9 +96,9 @@ export const PengeluaranBaru = ({ open, onClose }) => {
                     </FormControl>
 
                     <TextField
-                        name="purpose"
-                        label="Tujuan Pengeluaran"
-                        value={formData.purpose}
+                        name="source"
+                        label="Sumber Dana"
+                        value={formData.source}
                         onChange={handleChange}
                         fullWidth
                     />
@@ -129,10 +129,10 @@ export const PengeluaranBaru = ({ open, onClose }) => {
                     />
 
                     <Stack direction="row" spacing={2} justifyContent="flex-end" mt={3}>
-                        <Button variant="text" onClick={onClose} sx={{ color: "#ff3a3a" }}>
+                        <Button variant="text" onClick={onClose} sx={{ color: "#2E7D32" }}>
                             Batal
                         </Button>
-                        <Button variant="contained" onClick={handleSave} sx={{ bgcolor: "#ff3a3a" }}>
+                        <Button variant="contained" onClick={handleSave} sx={{ bgcolor: "#2E7D32" }}>
                             Simpan
                         </Button>
                     </Stack>

@@ -35,11 +35,11 @@ export const UserProfileSection = () => {
     ];
 
     return (
-        <Box sx={{ width: 226, mt: 4 }}>
+        <Box sx={{ width: 220, height: 80 }}>
             <Card
                 sx={{
-                    width: 212,
-                    borderRadius: 2,
+                    width: 230,
+                    borderRadius: 1,
                     boxShadow: "0px 0px 14px rgba(0, 0, 0, 0.06)",
                 }}
             >
@@ -98,32 +98,47 @@ export const UserProfileSection = () => {
                             fontFamily="Inter, Helvetica"
                         >
                             Kategori
-                        </Typography>
-                        <FormControl fullWidth size="small" margin="dense">
-                            <Select
-                                displayEmpty
-                                IconComponent={KeyboardArrowDown}
-                                sx={{
-                                    height: 30,
-                                    fontSize: 10,
-                                    fontFamily: "Poppins, Helvetica",
-                                    borderColor: "#d6e4ec",
-                                }}
-                            >
-                                <MenuItem value="">
-                                    <Typography variant="caption"></Typography>
-                                </MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Box>
-
-                    <Box sx={{ mt: 2 }}>
-                        <Typography
-                            variant="caption"
-                            fontWeight="600"
-                            letterSpacing="0.5px"
-                            fontFamily="Inter, Helvetica"
-                        >
+                            <Box sx={{ mt: 2 }}>
+                                <Typography
+                                    variant="caption"
+                                    fontWeight="600"
+                                    letterSpacing="0.5px"
+                                    fontFamily="Inter, Helvetica"
+                                >
+                                    Kategori
+                                </Typography>
+                                <FormControl fullWidth size="small" margin="dense">
+                                    <Select
+                                        displayEmpty
+                                        IconComponent={KeyboardArrowDown}
+                                        sx={{
+                                            height: 30,
+                                            fontSize: 10,
+                                            fontFamily: "Poppins, Helvetica",
+                                            borderColor: "#d6e4ec",
+                                        }}
+                                    >
+                                        <MenuItem value="">
+                                            <Typography variant="caption">Pilih Kategori</Typography>
+                                        </MenuItem>
+                                        <MenuItem value="makanan">
+                                            <Typography variant="caption">Makanan</Typography>
+                                        </MenuItem>
+                                        <MenuItem value="transportasi">
+                                            <Typography variant="caption">Transportasi</Typography>
+                                        </MenuItem>
+                                        <MenuItem value="hiburan">
+                                            <Typography variant="caption">Hiburan</Typography>
+                                        </MenuItem>
+                                        <MenuItem value="tagihan">
+                                            <Typography variant="caption">Tagihan</Typography>
+                                        </MenuItem>
+                                        <MenuItem value="investasi">
+                                            <Typography variant="caption">Investasi</Typography>
+                                        </MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Box>
                             Catatan
                         </Typography>
                         <TextField

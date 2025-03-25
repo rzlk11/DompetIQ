@@ -18,6 +18,8 @@ import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
 import PetsIcon from '@mui/icons-material/Pets';
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const HalamanTerjadwal = () => {
   const [showIncomeForm, setShowIncomeForm] = useState(false);
@@ -27,7 +29,9 @@ const HalamanTerjadwal = () => {
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua Kategori');
-  
+  const [editingTransaction, setEditingTransaction] = useState(null);
+  const [activeTransactionId, setActiveTransactionId] = useState(null);
+
   // Create refs for the forms
   const incomeFormRef = useRef(null);
   const expenseFormRef = useRef(null);
@@ -418,6 +422,21 @@ const HalamanTerjadwal = () => {
     </div>
   );
 
+  const handleToggleOptions = (id) => {
+    setActiveTransactionId((prev) => (prev === id ? null : id));
+  };
+
+  const handleEditTransaction = (transaction) => {
+    setEditingTransaction(transaction); // Setel transaksi yang sedang diedit
+  };
+
+  const handleDeleteTransaction = (transactionId) => {
+    if (window.confirm("Apakah Anda yakin ingin menghapus transaksi ini?")) {
+      const updatedTransactions = scheduledTransactions.filter((t) => t.id !== transactionId);
+      setScheduledTransactions(updatedTransactions); // Perbarui daftar transaksi
+    }
+  };
+
   return (
     <div className="flex bg-gray-100 min-h-screen p-4 gap-4">
       {/* Left Panel - Transaction History */}
@@ -426,7 +445,7 @@ const HalamanTerjadwal = () => {
         
         <div className="space-y-1">
           {scheduledTransactions.map((transaction) => (
-            <div key={transaction.id} className="flex items-center p-3 hover:bg-gray-50 border-b cursor-pointer transition-colors">
+            <div key={transaction.id} className="flex items-center p-3 hover:bg-gray-50 border-b cursor-pointer transition-colors relative">
               {/* Main content */}
               <div className="flex-1">
                 <div className="font-medium">{transaction.category}</div>
@@ -442,9 +461,32 @@ const HalamanTerjadwal = () => {
               </div>
               
               {/* More Options Button */}
-              <button className="p-1 hover:bg-gray-100 rounded-full">
+              <button
+                className="p-1 hover:bg-gray-100 rounded-full"
+                onClick={() => handleToggleOptions(transaction.id)}
+              >
                 <MoreVertIcon fontSize="small" />
               </button>
+
+              {/* Options Dropdown */}
+              {activeTransactionId === transaction.id && (
+                <div className="absolute right-0 top-10 bg-white shadow-md rounded-lg p-2 z-10">
+                  <button
+                    className="flex items-center w-full px-3 py-2 hover:bg-gray-100 rounded-md"
+                    onClick={() => handleEditTransaction(transaction)}
+                  >
+                    <EditIcon fontSize="small" className="mr-2" />
+                    Edit
+                  </button>
+                  <button
+                    className="flex items-center w-full px-3 py-2 hover:bg-gray-100 rounded-md"
+                    onClick={() => handleDeleteTransaction(transaction.id)}
+                  >
+                    <DeleteIcon fontSize="small" className="mr-2" />
+                    Hapus
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -739,6 +781,71 @@ const HalamanTerjadwal = () => {
 	             Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {editingTransaction && (
+        <div className="fixed inset-0 flex justify-center items-center z-50 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Edit Transaksi</h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                // Simpan perubahan transaksi
+                const updatedTransactions = scheduledTransactions.map((t) =>
+                  t.id === editingTransaction.id ? editingTransaction : t
+                );
+                setScheduledTransactions(updatedTransactions);
+                setEditingTransaction(null); // Tutup form
+              }}
+            >
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Kategori</label>
+                <input
+                  type="text"
+                  value={editingTransaction.category}
+                  onChange={(e) =>
+                    setEditingTransaction({ ...editingTransaction, category: e.target.value })
+                  }
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Subkategori</label>
+                <input
+                  type="text"
+                  value={editingTransaction.subcategory}
+                  onChange={(e) =>
+                    setEditingTransaction({ ...editingTransaction, subcategory: e.target.value })
+                  }
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Jumlah</label>
+                <input
+                  type="number"
+                  value={editingTransaction.amount}
+                  onChange={(e) =>
+                    setEditingTransaction({ ...editingTransaction, amount: parseInt(e.target.value) })
+                  }
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingTransaction(null)}
+                  className="px-4 py-2 bg-gray-300 rounded"
+                >
+                  Batal
+                </button>
+                <button type="submit" className="px-4 py-2 bg-green-500 text-white rounded">
+                  Simpan
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -10,22 +10,39 @@ const Footer = () => {
       sx={{
         backgroundColor: "#40AC0B",
         color: "white",
+        padding: "20px 0",
       }}
     >
       <Container maxWidth="lg">
-        <Grid container spacing={-2} alignItems="center">
+        <Grid container spacing={2} alignItems="center">
           {/* Logo Utama */}
           <Grid item xs={12} md={6}>
-            <Box display="flex" flexDirection="column" alignItems="center" sx={{ ml: -29 }}>
-              <img src={footerlogo} alt="DompetIQ Logo" style={{ height: 60, marginBottom: 7, marginRight: 4 }} />
-              <text text style={{ textAlign: "left", marginLeft: "250px" }}>Smart solutions for personal finance <br /> Aplikasi Pengelola Keuangan Pribadi dan Rumah Tangga</text>
+            <Box
+              display="flex"
+              flexDirection="column"
+              alignItems={{ xs: "center", md: "flex-start" }}
+              textAlign={{ xs: "center", md: "left" }}
+              sx={{ mb: { xs: 3, md: 0 } }}
+            >
+              <img
+                src={footerlogo}
+                alt="DompetIQ Logo"
+                style={{ height: 60, marginBottom: 7 }}
+              />
+              <Typography variant="body2" sx={{ fontSize: "14px" }}>
+                Smart solutions for personal finance <br />
+                Aplikasi Pengelola Keuangan Pribadi dan Rumah Tangga
+              </Typography>
             </Box>
           </Grid>
 
           {/* Navigasi */}
-          <Grid item mt={5} md={2}>
-            <Box textAlign="Left">
-              <Typography variant="h6" sx={{ color: "white", fontWeight: "bold", marginBottom: 2 }}>
+          <Grid item xs={6} md={2}>
+            <Box textAlign={{ xs: "center", md: "left" }}>
+              <Typography
+                variant="h6"
+                sx={{ color: "white", fontWeight: "bold", marginBottom: 2 }}
+              >
                 Jelajahi
               </Typography>
               <Typography>
@@ -44,9 +61,12 @@ const Footer = () => {
           </Grid>
 
           {/* Informasi & Kebijakan */}
-          <Grid item mt={5} md={4}>
-            <Box textAlign="left">
-              <Typography variant="h6" sx={{ color: "white", fontWeight: "bold", marginBottom: 2 }}>
+          <Grid item xs={6} md={2}>
+            <Box textAlign={{ xs: "center", md: "left" }}>
+              <Typography
+                variant="h6"
+                sx={{ color: "white", fontWeight: "bold", marginBottom: 2 }}
+              >
                 Informasi
               </Typography>
               <Typography>
@@ -65,9 +85,12 @@ const Footer = () => {
           </Grid>
 
           {/* Support */}
-          <Grid item mt={-1} ml={-25}>
-            <Box textAlign="left">
-              <Typography variant="h6" sx={{ color: "white", fontWeight: "bold", marginBottom: 2 }}>
+          <Grid item xs={12} md={2}>
+            <Box textAlign={{ xs: "center", md: "left" }}>
+              <Typography
+                variant="h6"
+                sx={{ color: "white", fontWeight: "bold", marginBottom: 2 }}
+              >
                 Support
               </Typography>
               <Typography>
@@ -81,12 +104,29 @@ const Footer = () => {
         </Grid>
 
         {/* Logo Gabungan OJK & IDX dan Sosial Media */}
-        <Box mt={9}>
+        <Box mt={5}>
           {/* Garis Pemisah */}
-          <Box sx={{ borderBottom: "1px solid white", mb: -2, width: "144%", ml: -30 }} />
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box
+            sx={{
+              borderBottom: "1px solid white",
+              mb: 2,
+              width: "100%",
+            }}
+          />
+          <Box
+            display="flex"
+            flexDirection={{ xs: "column", md: "row" }}
+            justifyContent="space-between"
+            alignItems="center"
+            textAlign="center"
+          >
             {/* Ikon Sosial Media */}
-            <Box display="flex" alignItems="center" gap={2} sx={{ marginTop: "25px", marginLeft: "399px" }}>
+            <Box
+              display="flex"
+              alignItems="center"
+              gap={2}
+              sx={{ marginBottom: { xs: 2, md: 0 } }}
+            >
               <Typography variant="subtitle1" sx={{ color: "white" }}>
                 Follow us on:
               </Typography>
@@ -108,23 +148,15 @@ const Footer = () => {
             </Box>
 
             {/* Gambar Gabungan OJK & IDX */}
-            {/* <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              textAlign="center"
-              gap={2}
-              sx={{
-                marginTop: 2, // Mengatur jarak ke atas
-                marginLeft: "50px", // Mengatur jarak ke kiri (gunakan nilai spesifik untuk posisi)
-                marginRight: "auto", // Mengatur jarak ke kanan
-              }}
-            >
-              <Typography variant="subtitle1" sx={{ color: "white", marginTop: "15px" }}>
+            <Box>
+              <Typography
+                variant="subtitle1"
+                sx={{ color: "white", marginBottom: 1 }}
+              >
                 Sertifikasi dan Akreditasi:
               </Typography>
               <img src={footerIDXOJK} alt="OJK dan IDX Logo" style={{ height: 70 }} />
-            </Box> */}
+            </Box>
           </Box>
         </Box>
       </Container>

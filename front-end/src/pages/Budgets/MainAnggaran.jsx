@@ -27,7 +27,7 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 function Anggaran() {
   // Add useNavigate hook for routing
   const navigate = useNavigate();
-  
+
   // Initial budget data
   const initialWeeklyBudgets = [
     { id: 'w1', name: 'Makan di Luar', date: '10/03/2025 - 16/03/2025', current: 150000, total: 500000, icon: RestaurantIcon, duration: 'Anggaran Mingguan' },
@@ -46,15 +46,10 @@ function Anggaran() {
   // State for weekly and monthly budgets
   const [weeklyBudgets, setWeeklyBudgets] = useState(initialWeeklyBudgets);
   const [monthlyBudgets, setMonthlyBudgets] = useState(initialMonthlyBudgets);
-  
   const [showEditModal, setShowEditModal] = useState(false);
-
   const [editingBudget, setEditingBudget] = useState(null);
-
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
   const [deletingBudget, setDeletingBudget] = useState(null);
-
   const [formValues, setFormValues] = useState({
     total: '',
     category: '',
@@ -70,8 +65,8 @@ function Anggaran() {
   const categoryData = [
     { name: 'Makanan / Minuman', icon: RestaurantIcon, sublist: [] },
     { name: 'Berbelanja', icon: ShoppingCartIcon, sublist: [] },
-    { 
-      name: 'Transportasi', 
+    {
+      name: 'Transportasi',
       icon: DirectionsCarIcon,
       sublist: [
         { name: 'Mobil' },
@@ -81,16 +76,16 @@ function Anggaran() {
       ]
     },
     { name: 'Hiburan', icon: SportsEsportsIcon, sublist: [] },
-    { 
-      name: 'Rumah', 
+    {
+      name: 'Rumah',
       icon: HomeIcon,
       sublist: [
         { name: 'Tagihan listrik' },
         { name: 'Tagihan air' }
       ]
     },
-    { 
-      name: 'Keluarga', 
+    {
+      name: 'Keluarga',
       icon: FamilyRestroomIcon,
       sublist: [
         { name: 'Anak' },
@@ -99,16 +94,16 @@ function Anggaran() {
     },
     { name: 'Kesehatan / Olahraga', icon: FitnessCenterIcon, sublist: [] },
     { name: 'Hewan Peliharaan', icon: PetsIcon, sublist: [] },
-    { 
-      name: 'Liburan', 
+    {
+      name: 'Liburan',
       icon: BeachAccessIcon,
       sublist: [
         { name: 'Akomodasi' },
         { name: 'Transportasi' }
       ]
     },
-    { 
-      name: 'Lain (Pengeluaran)', 
+    {
+      name: 'Lain (Pengeluaran)',
       icon: MoreHorizIcon,
       sublist: [
         { name: 'Pajak' }
@@ -117,7 +112,7 @@ function Anggaran() {
   ];
 
   // Filter categories based on search query
-  const filteredCategories = categoryData.filter(category => 
+  const filteredCategories = categoryData.filter(category =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     category.sublist.some(sub => sub.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
@@ -220,16 +215,16 @@ function Anggaran() {
       };
 
       if (updatedBudget.duration === 'Anggaran Mingguan') {
-        setWeeklyBudgets(weeklyBudgets.map(budget => 
+        setWeeklyBudgets(weeklyBudgets.map(budget =>
           budget.id === updatedBudget.id ? updatedBudget : budget
         ));
       } else {
-        setMonthlyBudgets(monthlyBudgets.map(budget => 
+        setMonthlyBudgets(monthlyBudgets.map(budget =>
           budget.id === updatedBudget.id ? updatedBudget : budget
         ));
       }
     }
-    
+
     setShowEditModal(false);
     setEditingBudget(null);
   };
@@ -243,7 +238,7 @@ function Anggaran() {
         setMonthlyBudgets(monthlyBudgets.filter(budget => budget.id !== deletingBudget.id));
       }
     }
-    
+
     setShowDeleteModal(false);
     setDeletingBudget(null);
   };
@@ -281,13 +276,13 @@ function Anggaran() {
                   Rp {item.current.toLocaleString()} / Rp {item.total.toLocaleString()}
                 </p>
                 <div className="flex space-x-2">
-                  <button 
+                  <button
                     className="p-1 hover:bg-gray-100 rounded"
                     onClick={() => handleEditClick(item)}
                   >
                     <Edit fontSize="small" className="text-gray-500" />
                   </button>
-                  <button 
+                  <button
                     className="p-1 hover:bg-gray-100 rounded"
                     onClick={() => handleDeleteClick(item)}
                   >
@@ -312,7 +307,7 @@ function Anggaran() {
         {renderBudgetList(monthlyBudgets, "Anggaran Bulanan")}
 
         {/* Add Budget Button */}
-        <button 
+        <button
           className="fixed bottom-6 right-6 bg-green-500 text-white rounded-full p-3 shadow-lg hover:bg-green-600 transition-colors"
           onClick={handleAddBudget}
         >
@@ -325,30 +320,30 @@ function Anggaran() {
             <div className="rounded-lg p-6 w-full max-w-md shadow-xl" style={{ backgroundColor: '#f7f7f7' }}>
               <h2 className="text-xl font-bold text-center mb-4">EDIT ANGGARAN</h2>
               <p className="mb-4">Durasi: {editingBudget.duration}</p>
-              
+
               <div className="mb-4">
                 <div className="flex items-center mb-2">
                   <AccountBalanceWalletIcon className="mr-4 text-gray-600" />
                   <label className="block text-gray-700">Jumlah Anggaran</label>
                 </div>
                 <div className="flex items-center">
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     name="total"
-                    className="border rounded p-2 w-full" 
+                    className="border rounded p-2 w-full"
                     value={formValues.total}
                     onChange={handleInputChange}
                   />
                   <span className="ml-2">Rp</span>
                 </div>
               </div>
-              
+
               <div className="mb-4">
                 <div className="flex items-center mb-2">
                   <CategoryIcon className="mr-4 text-gray-600" />
                   <label className="block text-gray-700">Kategori</label>
                 </div>
-                <div 
+                <div
                   className="border rounded p-2 w-full cursor-pointer flex justify-between items-center"
                   onClick={openCategoryModal}
                 >
@@ -356,29 +351,29 @@ function Anggaran() {
                   <ExpandMoreIcon />
                 </div>
               </div>
-              
+
               <div className="mb-6">
                 <div className="flex items-center mb-2">
                   <AccountBalanceIcon className="mr-4 text-gray-600" />
                   <label className="block text-gray-700">Sumber</label>
                 </div>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="source"
-                  className="border rounded p-2 w-full" 
+                  className="border rounded p-2 w-full"
                   value={formValues.source}
                   onChange={handleInputChange}
                 />
               </div>
-              
+
               <div className="flex justify-between">
-                <button 
+                <button
                   className="text-green-500 font-medium"
                   onClick={handleCloseModal}
                 >
                   BATAL
                 </button>
-                <button 
+                <button
                   className="bg-green-500 text-white font-medium px-6 py-2 rounded"
                   onClick={handleSaveBudget}
                 >
@@ -396,20 +391,20 @@ function Anggaran() {
               <h2 className="text-xl font-bold text-center mb-6">
                 HAPUS "{deletingBudget.name.toUpperCase()}" ANGGARAN?
               </h2>
-              
+
               <div className="mb-4">
                 <p className="mb-1">Jumlah Anggaran: Rp {deletingBudget.total.toLocaleString()}</p>
                 <p className="mb-1">Durasi: {deletingBudget.duration}</p>
               </div>
-              
+
               <div className="flex justify-between mt-8">
-                <button 
+                <button
                   className="bg-blue-500 text-white font-medium px-6 py-2 rounded"
                   onClick={handleCloseDeleteModal}
                 >
                   BACK
                 </button>
-                <button 
+                <button
                   className="bg-red-500 text-white font-medium px-6 py-2 rounded"
                   onClick={handleConfirmDelete}
                 >
@@ -425,12 +420,12 @@ function Anggaran() {
           <div className="fixed inset-0 flex justify-center items-center z-50">
             {/* Modal Backdrop - changed to fully transparent to show the budget form */}
             <div className="absolute inset-0 bg-transparent"></div>
-            
+
             <div className="w-full max-w-md rounded shadow-lg z-10" style={{ backgroundColor: '#f7f7f7' }}>
               <div className="text-center font-semibold text-xl p-4 border-b">
                 SELECT CATEGORY
               </div>
-              
+
               {/* Search Bar */}
               <div className="p-4 border-b flex">
                 <input
@@ -444,15 +439,15 @@ function Anggaran() {
                   <SearchIcon />
                 </button>
               </div>
-              
+
               {/* Categories List */}
               <div className="max-h-80 overflow-y-auto">
                 {filteredCategories.map((category, index) => (
                   <div key={index} className="border-b">
                     <div
                       className="flex items-center p-3 cursor-pointer hover:bg-gray-100"
-                      onClick={() => category.sublist.length > 0 
-                        ? toggleExpandCategory(category.name) 
+                      onClick={() => category.sublist.length > 0
+                        ? toggleExpandCategory(category.name)
                         : selectCategory(category)}
                     >
                       <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
@@ -463,7 +458,7 @@ function Anggaran() {
                         <ExpandMoreIcon className={`transform ${expandedCategory === category.name ? 'rotate-180' : ''}`} />
                       )}
                     </div>
-                    
+
                     {/* Sublist items if expanded */}
                     {expandedCategory === category.name && category.sublist.length > 0 && (
                       <div className="pl-16 bg-gray-50">
@@ -481,7 +476,7 @@ function Anggaran() {
                   </div>
                 ))}
               </div>
-              
+
               {/* Modal Footer */}
               <div className="p-4 flex justify-end">
                 <button

@@ -30,6 +30,7 @@ const HalamanTransaksi = () => {
   const [expandedCategory, setExpandedCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua Kategori');
+  const [selectedTransactionCategory, setSelectedTransactionCategory] = useState('Semua Kategori');
   const [activeTransactionId, setActiveTransactionId] = useState(null);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [transactions, setTransactions] = useState([
@@ -105,10 +106,38 @@ const HalamanTransaksi = () => {
     }
   ]);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingTransaction, setDeletingTransaction] = useState(null);
+
+  // Fungsi untuk membuka modal konfirmasi hapus
+  const handleDeleteTransaction = (transaction) => {
+    setDeletingTransaction(transaction);
+    setShowDeleteModal(true);
+  };
+
+  // Fungsi untuk menutup modal konfirmasi hapus
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+    setDeletingTransaction(null);
+  };
+
+  // Fungsi untuk mengonfirmasi penghapusan transaksi
+  const handleConfirmDelete = () => {
+    if (deletingTransaction) {
+      const updatedTransactions = transactions.filter(
+        (t) => t.id !== deletingTransaction.id
+      );
+      setTransactions(updatedTransactions);
+    }
+    setShowDeleteModal(false);
+    setDeletingTransaction(null);
+  };
+
   // Create refs for the forms
   const incomeFormRef = useRef(null);
   const expenseFormRef = useRef(null);
   const categoryModalRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   // Category data
   const categoryData = [
@@ -186,6 +215,17 @@ const HalamanTransaksi = () => {
     setExpandedCategory(null);
   };
 
+  // Select a category for the transaction form
+  const selectTransactionCategory = (category, subcategory = null) => {
+    if (subcategory) {
+      setSelectedTransactionCategory(`${category.name} - ${subcategory.name}`);
+    } else {
+      setSelectedTransactionCategory(category.name);
+    }
+    setShowCategoryModal(false);
+    setExpandedCategory(null);
+  };
+
   // Close the category modal
   const closeCategoryModal = () => {
     setShowCategoryModal(false);
@@ -204,6 +244,9 @@ const HalamanTransaksi = () => {
       }
       if (showCategoryModal && categoryModalRef.current && !categoryModalRef.current.contains(event.target)) {
         closeCategoryModal();
+      }
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setActiveTransactionId(null);
       }
     };
 
@@ -249,182 +292,221 @@ const HalamanTransaksi = () => {
     onClose,
     fromToLabel,
     isIncome
-  }) => (
-    <div className="fixed inset-0  bg-opacity-50 flex items-center justify-center z-50">
-      <div
-        ref={formRef}
-        className="bg-white w-full max-w-md rounded-lg shadow-xl p-5 max-h-[90vh] overflow-y-auto"
-        style={{ maxHeight: '90vh' }}
-      >
-        <div className="flex justify-between items-center mb-4 sticky top-0 bg-white pt-1 pb-3 border-b">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            <CloseIcon fontSize="small" />
-          </button>
-        </div>
+  }) => {
+    const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
-        <div className="space-y-4">
-          {/* Kategori */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Kategori</label>
-            <div className="relative">
-              <input
-                type="text"
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-                placeholder="Pilih Kategori"
-                style={{ focus: { ringColor: color } }}
-                onClick={() => setShowCategoryModal(true)}
-              />
-              <KeyboardArrowDownIcon
-                className="absolute right-3 top-3 text-gray-400"
-              />
-            </div>
-          </div>
-
-          {/* Nilai */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Nilai</label>
-            <div className="flex items-center relative">
-              <input
-                type="text"
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-                inputMode="numeric"
-              />
-              <span className="absolute right-3 text-gray-600">Rp</span>
-            </div>
-          </div>
-
-          {/* Conditional: Return funds checkbox for income only */}
-          {isIncome && (
-            <div className="flex items-center pl-1">
-              <input type="checkbox" id="pengembalianDana" className="w-4 h-4 mr-2" />
-              <label
-                htmlFor="pengembalianDana"
-                className="text-sm text-gray-700"
-              >
-                Apakah pengembalian dana?
-              </label>
-            </div>
-          )}
-
-          {/* Total */}
-          <div className="flex justify-between py-2 border-t border-b">
-            <span className="text-sm font-medium">Total:</span>
-            <span className="font-semibold">Rp 0</span>
-          </div>
-
-          {/* Rekening */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Rekening</label>
-            <div className="relative">
-              <select className="w-full p-3 border rounded-lg appearance-none bg-white focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none">
-                <option>Dompet</option>
-                <option>Rekening Bank</option>
-              </select>
-              <KeyboardArrowDownIcon
-                className="absolute right-3 top-3 text-gray-400 pointer-events-none"
-              />
-            </div>
-          </div>
-
-          {/* Checkbox for "Dicintang" */}
-          <div className="flex items-center pl-1">
-            <input
-              type="checkbox"
-              id={`dicintang${isIncome ? 'Income' : 'Expense'}`}
-              className="w-4 h-4 mr-2"
-            />
-            <label
-              htmlFor={`dicintang${isIncome ? 'Income' : 'Expense'}`}
-              className="text-sm text-gray-700"
-            >
-              Dicintang
-            </label>
-          </div>
-
-          {/* Tanggal */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Tanggal</label>
-            <div className="relative">
-              <input
-                type="text"
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-                defaultValue={getCurrentDate()}
-              />
-              <CalendarTodayIcon
-                className="absolute right-3 top-3 text-gray-400"
-              />
-            </div>
-          </div>
-
-          {/* Waktu */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Waktu</label>
-            <input
-              type="text"
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-              defaultValue={getCurrentTime()}
-            />
-          </div>
-
-          {/* From/To (Conditional label) */}
-          <div>
-            <label className="block text-sm font-medium mb-1">{fromToLabel} (Opsional)</label>
-            <input
-              type="text"
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-            />
-          </div>
-
-          {/* Catatan (Opsional) */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Catatan (Opsional)</label>
-            <textarea
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none h-24 resize-none"
-            />
-          </div>
-
-          {/* Buttons */}
-          <div className="flex justify-end space-x-3 mt-6 sticky bottom-0 pb-1 pt-3 bg-white border-t">
+    return (
+      <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
+        <div
+          ref={formRef}
+          className="bg-white w-full max-w-md rounded-lg shadow-xl p-5 max-h-[90vh] overflow-y-auto relative"
+        >
+          <div className="flex justify-between items-center mb-4 sticky top-0 bg-white pt-1 pb-3 border-b">
+            <h2 className="text-lg font-semibold">{title}</h2>
             <button
               onClick={onClose}
-              className={`px-5 py-2.5 border border-${color}-500 rounded-lg text-${color}-500 font-medium hover:bg-${color}-50 transition-colors`}
-              style={{ color: isIncome ? '#10B981' : '#EF4444', borderColor: isIncome ? '#10B981' : '#EF4444' }}
+              className="text-gray-500 hover:text-gray-700 transition-colors"
             >
-              Batal
+              <CloseIcon fontSize="small" />
             </button>
-            <button
-              className={`px-5 py-2.5 bg-${color}-500 text-white rounded-lg font-medium hover:bg-${color}-600 transition-colors`}
-              style={{ backgroundColor: isIncome ? '#10B981' : '#EF4444' }}
-            >
-              Simpan
-            </button>
+          </div>
+
+          <div className="space-y-4">
+            {/* Kategori */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Kategori</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
+                  placeholder="Pilih Kategori"
+                  value={selectedTransactionCategory}
+                  readOnly
+                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                />
+                <KeyboardArrowDownIcon
+                  className="absolute right-3 top-3 text-gray-400"
+                />
+                {showCategoryDropdown && (
+                  <div className="absolute z-10 bg-white border rounded-lg shadow-lg mt-2 w-full max-h-60 overflow-y-auto">
+                    {categoryData.map((category, index) => (
+                      <div key={index} className="border-b">
+                        <div
+                          className="flex items-center p-3 cursor-pointer hover:bg-gray-100"
+                          onClick={() => {
+                            if (category.sublist.length > 0) {
+                              toggleExpandCategory(category.name);
+                            } else {
+                              selectTransactionCategory(category);
+                              setShowCategoryDropdown(false);
+                            }
+                          }}
+                        >
+                          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                            {React.createElement(category.icon, { className: "text-green-500" })}
+                          </div>
+                          <div className="flex-grow">{category.name}</div>
+                          {category.sublist.length > 0 && (
+                            <ExpandMoreIcon
+                              className={`transform ${expandedCategory === category.name ? 'rotate-180' : ''}`}
+                            />
+                          )}
+                        </div>
+                        {expandedCategory === category.name && category.sublist.length > 0 && (
+                          <div className="pl-8 bg-gray-50">
+                            {category.sublist.map((subcategory, subIdx) => (
+                              <div
+                                key={subIdx}
+                                className="py-2 px-4 cursor-pointer hover:bg-gray-100"
+                                onClick={() => {
+                                  selectTransactionCategory(category, subcategory);
+                                  setShowCategoryDropdown(false);
+                                }}
+                              >
+                                {subcategory.name}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+  
+            {/* Nilai */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Nilai</label>
+              <div className="flex items-center relative">
+                <input
+                  type="text"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
+                  inputMode="numeric"
+                />
+                <span className="absolute right-3 text-gray-600">Rp</span>
+              </div>
+            </div>
+  
+            {/* Conditional: Return funds checkbox for income only */}
+            {isIncome && (
+              <div className="flex items-center pl-1">
+                <input type="checkbox" id="pengembalianDana" className="w-4 h-4 mr-2" />
+                <label
+                  htmlFor="pengembalianDana"
+                  className="text-sm text-gray-700"
+                >
+                  Apakah pengembalian dana?
+                </label>
+              </div>
+            )}
+  
+            {/* Total */}
+            <div className="flex justify-between py-2 border-t border-b">
+              <span className="text-sm font-medium">Total:</span>
+              <span className="font-semibold">Rp 0</span>
+            </div>
+  
+            {/* Rekening */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Rekening</label>
+              <div className="relative">
+                <select className="w-full p-3 border rounded-lg appearance-none bg-white focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none">
+                  <option>Dompet</option>
+                  <option>Rekening Bank</option>
+                </select>
+                <KeyboardArrowDownIcon
+                  className="absolute right-3 top-3 text-gray-400 pointer-events-none"
+                />
+              </div>
+            </div>
+  
+            {/* Checkbox for "Dicintang" */}
+            <div className="flex items-center pl-1">
+              <input
+                type="checkbox"
+                id={`dicintang${isIncome ? 'Income' : 'Expense'}`}
+                className="w-4 h-4 mr-2"
+              />
+              <label
+                htmlFor={`dicintang${isIncome ? 'Income' : 'Expense'}`}
+                className="text-sm text-gray-700"
+              >
+                Dicintang
+              </label>
+            </div>
+  
+            {/* Tanggal */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Tanggal</label>
+              <div className="relative">
+                <input
+                  type="text"
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
+                  defaultValue={getCurrentDate()}
+                />
+                <CalendarTodayIcon
+                  className="absolute right-3 top-3 text-gray-400"
+                />
+              </div>
+            </div>
+  
+            {/* Waktu */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Waktu</label>
+              <input
+                type="text"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
+                defaultValue={getCurrentTime()}
+              />
+            </div>
+  
+            {/* From/To (Conditional label) */}
+            <div>
+              <label className="block text-sm font-medium mb-1">{fromToLabel} (Opsional)</label>
+              <input
+                type="text"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
+              />
+            </div>
+  
+            {/* Catatan (Opsional) */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Catatan (Opsional)</label>
+              <textarea
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none h-24 resize-none"
+              />
+            </div>
+  
+            {/* Buttons */}
+            <div className="flex justify-end space-x-3 mt-6 sticky bottom-0 pb-1 pt-3 bg-white border-t">
+              <button
+                onClick={onClose}
+                className={`px-5 py-2.5 border border-${color}-500 rounded-lg text-${color}-500 font-medium hover:bg-${color}-50 transition-colors`}
+                style={{ color: isIncome ? '#10B981' : '#EF4444', borderColor: isIncome ? '#10B981' : '#EF4444' }}
+              >
+                Batal
+              </button>
+              <button
+                onClick={onClose}
+                className={`px-5 py-2.5 bg-${color}-500 text-white rounded-lg font-medium hover:bg-${color}-600 transition-colors`}
+                style={{ backgroundColor: isIncome ? '#10B981' : '#EF4444' }}
+              >
+                Simpan
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
-
+    );
+  };
+  
   const handleToggleOptions = (transactionId) => {
-    if (activeTransactionId === transactionId) {
-      setActiveTransactionId(null);
-    } else {
-      setActiveTransactionId(transactionId);
-    }
+    setActiveTransactionId((prev) => (prev === transactionId ? null : transactionId));
   };
 
   const handleEditTransaction = (transaction) => {
     setEditingTransaction(transaction);
-  };
-
-  const handleDeleteTransaction = (transactionId) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus transaksi ini?")) {
-      const updatedTransactions = transactions.filter((t) => t.id !== transactionId);
-      setTransactions(updatedTransactions);
-    }
   };
 
   return (
@@ -466,7 +548,10 @@ const HalamanTransaksi = () => {
 
               {/* Options Dropdown */}
               {activeTransactionId === transaction.id && (
-                <div className="absolute right-0 top-10 bg-white shadow-md rounded-lg p-2 z-10">
+                <div
+                  ref={dropdownRef}
+                  className="absolute right-0 top-10 bg-white shadow-md rounded-lg p-2 z-10"
+                >
                   <button
                     className="flex items-center w-full px-3 py-2 hover:bg-gray-100 rounded-md"
                     onClick={() => handleEditTransaction(transaction)}
@@ -476,7 +561,7 @@ const HalamanTransaksi = () => {
                   </button>
                   <button
                     className="flex items-center w-full px-3 py-2 hover:bg-gray-100 rounded-md"
-                    onClick={() => handleDeleteTransaction(transaction.id)}
+                    onClick={() => handleDeleteTransaction(transaction)}
                   >
                     <DeleteIcon fontSize="small" className="mr-2" />
                     Hapus
@@ -700,7 +785,7 @@ const HalamanTransaksi = () => {
       )}
 
       {editingTransaction && (
-        <div className="fixed inset-0 flex justify-center items-center z-50 backdrop-blur-sm">
+        <div className="fixed inset-0 flex justify-center items-center z-50 backdrop-clear-sm">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h2 className="text-lg font-semibold mb-4">Edit Transaksi</h2>
             <form
@@ -747,6 +832,17 @@ const HalamanTransaksi = () => {
                   className="w-full p-2 border rounded"
                 />
               </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Tanggal</label>
+                <input
+                  type="date"
+                  value={editingTransaction.date}
+                  onChange={(e) =>
+                    setEditingTransaction({ ...editingTransaction, date: e.target.value })
+                  }
+                  className="w-full p-2 border rounded"
+                />
+              </div>
               <div className="flex justify-end space-x-2">
                 <button
                   type="button"
@@ -760,6 +856,35 @@ const HalamanTransaksi = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && deletingTransaction && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-clear-sm">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
+            <h2 className="text-xl font-bold text-center mb-6">
+              HAPUS TRANSAKSI "{deletingTransaction.category.toUpperCase()}"?
+            </h2>
+            <div className="mb-4">
+              <p className="mb-1">Subkategori: {deletingTransaction.subcategory}</p>
+              <p className="mb-1">Jumlah: Rp {deletingTransaction.amount.toLocaleString()}</p>
+              <p className="mb-1">Tanggal: {deletingTransaction.date}</p>
+            </div>
+            <div className="flex justify-between mt-8">
+              <button
+                className="bg-gray-300 text-gray-700 font-medium px-6 py-2 rounded hover:bg-gray-400"
+                onClick={handleCloseDeleteModal}
+              >
+                BATAL
+              </button>
+              <button
+                className="bg-red-500 text-white font-medium px-6 py-2 rounded hover:bg-red-600"
+                onClick={handleConfirmDelete}
+              >
+                HAPUS
+              </button>
+            </div>
           </div>
         </div>
       )}

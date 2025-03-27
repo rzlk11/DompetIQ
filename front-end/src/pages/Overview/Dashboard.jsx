@@ -1,9 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts';
-import { MoreVert, AttachMoney, Work, AccountBalanceWallet } from '@mui/icons-material';
+import { 
+  MoreVert, 
+  AttachMoney, 
+  Work, 
+  AccountBalanceWallet,
+  Close 
+} from '@mui/icons-material';
+import { 
+  Dialog, 
+  DialogTitle, 
+  DialogContent, 
+  DialogActions, 
+  Button, 
+  Select, 
+  MenuItem, 
+  FormControl, 
+  InputLabel 
+} from '@mui/material';
 
 const Dashboard = () => {
-  // Data for monthly chart
+  // State for popups and item counts
+  const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
+  const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);
+  const [transactionItemCount, setTransactionItemCount] = useState(5);
+  const [budgetItemCount, setBudgetItemCount] = useState(6);
+
+  // Monthly chart data
   const monthlyData = [
     { name: 'Jan', value: 30 },
     { name: 'Feb', value: 25 },
@@ -59,6 +82,24 @@ const Dashboard = () => {
     },
   ];
 
+  // Handler for transaction dialog
+  const handleTransactionDialogOpen = () => {
+    setTransactionDialogOpen(true);
+  };
+
+  const handleTransactionDialogClose = () => {
+    setTransactionDialogOpen(false);
+  };
+
+  // Handler for budget dialog
+  const handleBudgetDialogOpen = () => {
+    setBudgetDialogOpen(true);
+  };
+
+  const handleBudgetDialogClose = () => {
+    setBudgetDialogOpen(false);
+  };
+
   return (
     <div className="bg-gray-100 p-4 min-h-screen">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -111,7 +152,6 @@ const Dashboard = () => {
           <div className="bg-white rounded-lg p-4 mb-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-bold">Ringkasan</h2>
-              <MoreVert fontSize="small" />
             </div>
             <div className="relative h-64">
               <ResponsiveContainer width="100%" height="100%">
@@ -127,7 +167,11 @@ const Dashboard = () => {
           <div className="bg-white rounded-lg p-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-bold">Riwayat Transaksi</h2>
-              <MoreVert fontSize="small" />
+              <MoreVert 
+                fontSize="small" 
+                onClick={handleTransactionDialogOpen} 
+                style={{ cursor: 'pointer' }} 
+              />
             </div>
             <div className="space-y-4">
               {transactions.map((transaction) => (
@@ -153,6 +197,39 @@ const Dashboard = () => {
               ))}
             </div>
           </div>
+
+          {/* Transaction Dialog */}
+          <Dialog
+            open={transactionDialogOpen}
+            onClose={handleTransactionDialogClose}
+            fullWidth
+            maxWidth="xs"
+          >
+            <DialogTitle>TRANSAKSI</DialogTitle>
+            <DialogContent>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Jumlah Input Yang Ditampilakn</InputLabel>
+                <Select
+                  value={transactionItemCount}
+                  label="Number of items shown"
+                  onChange={(e) => setTransactionItemCount(e.target.value)}
+                >
+                  <MenuItem value={5}>5</MenuItem>
+                  <MenuItem value={10}>10</MenuItem>
+                  <MenuItem value={15}>15</MenuItem>
+                  <MenuItem value={20}>20</MenuItem>
+                </Select>
+              </FormControl>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleTransactionDialogClose} color="primary">
+                BATAL
+              </Button>
+              <Button onClick={handleTransactionDialogClose} color="primary">
+                SIMPAN
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
 
         <div className="md:col-span-1">
@@ -160,7 +237,6 @@ const Dashboard = () => {
           <div className="bg-white rounded-lg p-4 mb-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-bold">Aktivitas</h2>
-              <MoreVert fontSize="small" />
             </div>
             <div className="relative h-48 flex items-center justify-center">
               {/* Large Green Bubble */}
@@ -214,7 +290,11 @@ const Dashboard = () => {
           <div className="bg-white rounded-lg p-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="font-bold">Anggaran</h2>
-              <MoreVert fontSize="small" />
+              <MoreVert 
+                fontSize="small" 
+                onClick={handleBudgetDialogOpen} 
+                style={{ cursor: 'pointer' }} 
+              />
             </div>
             <div className="space-y-4">
               {budgets.map((budget) => (
@@ -237,6 +317,39 @@ const Dashboard = () => {
               ))}
             </div>
           </div>
+
+          {/* Budget Dialog */}
+          <Dialog
+            open={budgetDialogOpen}
+            onClose={handleBudgetDialogClose}
+            fullWidth
+            maxWidth="xs"
+          >
+            <DialogTitle>ANGGARAN</DialogTitle>
+            <DialogContent>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Jumlah item yang ditampilkan</InputLabel>
+                <Select
+                  value={budgetItemCount}
+                  label="Number of items shown"
+                  onChange={(e) => setBudgetItemCount(e.target.value)}
+                >
+                  <MenuItem value={5}>5</MenuItem>
+                  <MenuItem value={10}>10</MenuItem>
+                  <MenuItem value={15}>15</MenuItem>
+                  <MenuItem value={20}>20</MenuItem>
+                </Select>
+              </FormControl>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleBudgetDialogClose} color="primary">
+                BATAL
+              </Button>
+              <Button onClick={handleBudgetDialogClose} color="primary">
+                SIMPAN
+              </Button>
+            </DialogActions>
+          </Dialog>
         </div>
       </div>
     </div>

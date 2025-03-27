@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link, useNavigate } from "react-router-dom";
 import Footer from "./Footer"; 
 import logo from "../assets/logo.png";
 import logoIDX from "../assets/logo-IDX.png";
@@ -18,6 +19,13 @@ const scrollToSection = (id) => {
 };
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
+  const handleSubscribeClick = (e) => {
+    e.preventDefault(); // Prevent default form submission
+    navigate('/Register'); // Navigate to Register page
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Navbar */}
@@ -185,72 +193,77 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-12 mt-16">
             {/* Kartu 1 */}
             <div className="bg-white shadow-lg rounded-lg p-6 text-center">
-              <div className="h-70 bg-gray-200 rounded-lg mb-4"><img src={gambar1} alt="Logo DompetIQ" className="h-70" /></div> {/* Placeholder gambar */}
+              <div className="h-70 bg-gray-200 rounded-lg mb-4"><img src={gambar1} alt="Logo DompetIQ" className="h-70" /></div>
               <h4 className="text-2xl font-semibold text-black">Analisis Keuangan</h4>
             </div>
 
             {/* Kartu 2 */}
             <div className="bg-white shadow-lg rounded-lg p-6 text-center">
-              <div className="h-70 bg-gray-200 rounded-lg mb-4"><img src={gambar2} alt="Logo DompetIQ" className="h-70" /></div> {/* Placeholder gambar */}
+              <div className="h-70 bg-gray-200 rounded-lg mb-4"><img src={gambar2} alt="Logo DompetIQ" className="h-70" /></div>
               <h4 className="text-2xl font-semibold text-black">Transaksi dengan Filter</h4>
             </div>
 
             {/* Kartu 3 */}
             <div className="bg-white shadow-lg rounded-lg p-6 text-center">
-              <div className="h-70 bg-gray-200 rounded-lg mb-4"><img src={gambar3} alt="Logo DompetIQ" className="h-70" /></div> {/* Placeholder gambar */}
+              <div className="h-70 bg-gray-200 rounded-lg mb-4"><img src={gambar3} alt="Logo DompetIQ" className="h-70" /></div>
               <h4 className="text-2xl font-semibold text-black">Menetapkan Anggaran</h4>
             </div>
 
             {/* Kartu 4 */}
             <div className="bg-white shadow-lg rounded-lg p-6 text-center">
-              <div className="h-70 bg-gray-200 rounded-lg mb-4"><img src={gambar4} alt="Logo DompetIQ" className="h-70" /></div> {/* Placeholder gambar */}
+              <div className="h-70 bg-gray-200 rounded-lg mb-4"><img src={gambar4} alt="Logo DompetIQ" className="h-70" /></div>
               <h4 className="text-2xl font-semibold text-black">Pengelolaan Kategori</h4>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Subscribe Section */}
       <section className="py-16 bg-black text-white">
-  <div className="container mx-auto max-w-4xl px-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-    {/* Teks Subscribe */}
-    <div className="text-left">
-      <h3 className="text-lg font-semibold text-green-500">Subscribe</h3>
-      <h2 className="text-3xl md:text-4xl font-bold leading-tight mt-2">
-        Tetap terinformasi, jangan <br />
-        pernah melewatkan <span className="underline decoration-green-500">informasi terbaru!</span>
-      </h2>
-      <p className="mt-4 text-gray-400 text-base">
-        Kami akan mengirimkan informasi terbaru seputar pengelolaan keuangan pribadi dan rumah tangga. Kami juga akan membagikan wawasan tentang teknologi digital yang dapat membantu Anda merencanakan keuangan dengan lebih cerdas.
-      </p>
-    </div>
+        <div className="container mx-auto max-w-4xl px-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          {/* Teks Subscribe */}
+          <div className="text-left">
+            <h3 className="text-lg font-semibold text-green-500">Subscribe</h3>
+            <h2 className="text-3xl md:text-4xl font-bold leading-tight mt-2">
+              Tetap terinformasi, jangan <br />
+              pernah melewatkan <span className="underline decoration-green-500">informasi terbaru!</span>
+            </h2>
+            <p className="mt-4 text-gray-400 text-base">
+              Kami akan mengirimkan informasi terbaru seputar pengelolaan keuangan pribadi dan rumah tangga. Kami juga akan membagikan wawasan tentang teknologi digital yang dapat membantu Anda merencanakan keuangan dengan lebih cerdas.
+            </p>
+          </div>
 
-    {/* Form Subscribe */}
-    <div>
-      <form className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
-        <input
-          type="email"
-          placeholder="Alamat Email"
-          className="w-full md:w-auto flex-1 px-4 py-2 text-gray-900 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
-        <button
-          type="submit"
-          className="px-6 py-2 bg-green-500 text-white rounded-lg text-base font-semibold hover:bg-green-600"
-        >
-          Subscribe
-        </button>
-      </form>
-    </div>
-  </div>
-</section>
+          {/* Form Subscribe */}
+          <div>
+            <form 
+              className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4"
+              onSubmit={handleSubscribeClick}
+            >
+              <input
+                type="email"
+                placeholder="Alamat Email"
+                className="w-full md:w-auto flex-1 px-4 py-2 text-gray-900 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              />
+              <button
+                type="submit"
+                className="px-6 py-2 bg-green-500 text-white rounded-lg text-base font-semibold hover:bg-green-600"
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
       <Footer />
-      {/* Copyright Section */}
-<div className="bg-white text-black text-center py-4">
-  <p className="text-sm">
-    Copyright © DompetIQ 2025. All Rights Reserved.
-  </p>
-</div>
-    </div>
       
+      {/* Copyright Section */}
+      <div className="bg-white text-black text-center py-4">
+        <p className="text-sm">
+          Copyright © DompetIQ 2025. All Rights Reserved.
+        </p>
+      </div>
+    </div>
   );
 };
 

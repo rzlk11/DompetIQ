@@ -12,7 +12,7 @@ import { authorized } from '../middleware/AuthUser.js';
 const router = express.Router();
 
 router.get('/users', verifyUser, authorized, getUsers);
-router.get('/users/:id', verifyUser,authorized, getUserById);
+router.get('/users/:id', verifyUser, authorized, getUserById);
 router.post('/users', createUser);
 router.patch('/users/:id', verifyUser, authorized, updateUser);
 router.delete('/users/:id', verifyUser, authorized, deleteUser);

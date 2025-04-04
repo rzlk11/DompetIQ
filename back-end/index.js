@@ -8,6 +8,8 @@ import UserRoute from "./routes/UserRoute.js";
 import BudgetRoute from "./routes/BudgetRoute.js";
 import TransactionRoute from "./routes/TransactionRoute.js";
 import AuthRoute from "./routes/AuthRoute.js";
+import CategoryRoute from "./routes/CategoryRoute.js";
+import ScheduledRoute from "./routes/ScheduledRoute.js";
 dotenv.config();
 
 const app = express();
@@ -15,12 +17,12 @@ const app = express();
 const sessionStore = SequelizeStore(session.Store);
 
 const store = new sessionStore({
-  db : db
+  db: db,
 });
 
-// (async() => {
-//   await db.sync();
-// })();
+(async () => {
+  await db.sync();
+})();
 
 app.use(
   session({
@@ -43,9 +45,11 @@ app.use(express.json());
 app.use(UserRoute);
 app.use(BudgetRoute);
 app.use(TransactionRoute);
+app.use(CategoryRoute);
+app.use(ScheduledRoute);
 app.use(AuthRoute);
 
-// store.sync();
+store.sync();
 
 app.listen(process.env.APP_PORT, () => {
   console.log(`Server is running on port ${process.env.APP_PORT}`);

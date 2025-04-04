@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getMe } from '../../features/authSlice';
 // Import Material UI icons
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -22,6 +24,19 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useNavigate } from 'react-router-dom';
 
 const BudgetForm = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { isError } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    dispatch(getMe());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isError) {
+      navigate("/login");
+    }
+  }, [isError, navigate]);
   const [activeTab, setActiveTab] = useState('single');
   const [formData, setFormData] = useState({
     name: '',
@@ -33,7 +48,7 @@ const BudgetForm = () => {
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategory, setExpandedCategory] = useState(null);
-  const navigate = useNavigate();
+  
 
   // Income categories with Material UI icons and sublists
   const [incomeCategories, setIncomeCategories] = useState([

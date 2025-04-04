@@ -1,30 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
+import { LoginUser, reset } from '../features/authSlice'
 import logo from '../assets/IQlogo.jpeg';
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const { user, isError, isSuccess, isLoading, message } = useSelector((state) => state.auth);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-  };
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setFormData ({
+  //     ...formData,
+  //     [name]: value
+  //   });
+  // };
+
+  useEffect(() => {
+    if(user || isSuccess) {
+      navigate('/dashboard');
+      dispatch(reset());
+    }
+  }, [user, isSuccess, dispatch, navigate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle login logic here
-    console.log('Login form submitted:', formData);
-    
-    // Navigate to MainLayout after login
-    navigate('/dashboard');
+    dispatch(LoginUser({email, password}));
   };
 
   return (
@@ -39,6 +45,7 @@ const Login = () => {
         <h1 className="text-2xl font-semibold text-center text-gray-800 mb-8">Masuk Akun</h1>
         
         <form onSubmit={handleSubmit}>
+          {isError && <p className='block text-sm text-gray-600 mb-2'>{message}</p>}
           {/* Email Field */}
           <div className="mb-6">
             <label htmlFor="email" className="block text-sm text-gray-600 mb-2">Email</label>
@@ -46,8 +53,8 @@ const Login = () => {
               type="email"
               id="email"
               name="email"
-              value={formData.email}
-              onChange={handleChange}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
               required
             />
@@ -72,8 +79,8 @@ const Login = () => {
               type={showPassword ? "text" : "password"}
               id="password"
               name="password"
-              value={formData.password}
-              onChange={handleChange}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
               required
             />
@@ -84,7 +91,7 @@ const Login = () => {
             type="submit"
             className="w-full bg-green-500 text-white py-3 rounded-md hover:bg-green-600 transition duration-300 mb-4"
           >
-            Masuk
+            {isLoading ? 'Loading...' : 'Masuk'}
           </button>
           
           {/* Terms of Service */}

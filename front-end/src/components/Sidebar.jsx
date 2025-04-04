@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { LogOut, reset } from '../features/authSlice';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import logoImg from '../assets/logo.png';
 
@@ -25,13 +27,17 @@ const Sidebar = () => {
   const [showDiagramMenu, setShowDiagramMenu] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
 
   // Determine active route
   const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
     // Add any logout logic here (clear tokens, etc.)
-    navigate('/');
+    dispatch(LogOut());
+    dispatch(reset());
+    navigate('/login');
   };
 
   // Function to handle navigation to Anggaran page
@@ -255,11 +261,11 @@ const Sidebar = () => {
           <div className="border-t border-gray-800">
             <div className="p-4 flex items-center">
               <div className="h-10 w-10 rounded-full bg-gray-700 flex-shrink-0 overflow-hidden">
-                <img src="https://i.pravatar.cc/150?img=68" alt="User" className="h-full w-full object-cover" />
+                <img src={`https://ui-avatars.com/api/?name=${user && user.username}`} alt="User" className="h-full w-full object-cover" />
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium">Suparno</p>
-                <p className="text-xs text-gray-500">suparno123@gmail.com</p>
+                <p className="text-sm font-medium">{user && user.username}</p>
+                <p className="text-xs text-gray-500">{user && user.email}</p>
               </div>
             </div>
             

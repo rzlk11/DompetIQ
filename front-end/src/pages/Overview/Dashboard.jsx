@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, ResponsiveContainer } from 'recharts';
 import { 
   MoreVert, 
@@ -18,8 +18,24 @@ import {
   FormControl, 
   InputLabel 
 } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { getMe } from '../../features/authSlice';
 
 const Dashboard = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isError } = useSelector((state => state.auth));
+
+  useEffect(()=>{
+    dispatch(getMe());
+  }, [dispatch]);
+
+  useEffect(()=>{
+    if(isError){
+      navigate('/login');
+    };
+  }, [isError, navigate]);
   // State for popups and item counts
   const [transactionDialogOpen, setTransactionDialogOpen] = useState(false);
   const [budgetDialogOpen, setBudgetDialogOpen] = useState(false);

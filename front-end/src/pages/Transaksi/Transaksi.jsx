@@ -1,109 +1,127 @@
-import React, { useState, useRef, useEffect } from 'react';
-import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import CloseIcon from '@mui/icons-material/Close';
-import SearchIcon from '@mui/icons-material/Search';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import RestaurantIcon from '@mui/icons-material/Restaurant';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
-import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
-import HomeIcon from '@mui/icons-material/Home';
-import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import PetsIcon from '@mui/icons-material/Pets';
-import BeachAccessIcon from '@mui/icons-material/BeachAccess';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import React, { useState, useRef, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { getMe } from "../../features/authSlice";
+import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import CloseIcon from "@mui/icons-material/Close";
+import SearchIcon from "@mui/icons-material/Search";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import SportsEsportsIcon from "@mui/icons-material/SportsEsports";
+import HomeIcon from "@mui/icons-material/Home";
+import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
+import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
+import PetsIcon from "@mui/icons-material/Pets";
+import BeachAccessIcon from "@mui/icons-material/BeachAccess";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 // Removed duplicate declaration of HalamanTransaksi
 const HalamanTransaksi = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isError } = useSelector((state) => state.auth);
+
+  useEffect(() => {
+    dispatch(getMe());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isError) {
+      navigate("/login");
+    }
+  }, [isError, navigate]);
+
   const [showIncomeForm, setShowIncomeForm] = useState(false);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Semua Kategori');
-  const [selectedTransactionCategory, setSelectedTransactionCategory] = useState('Semua Kategori');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Semua Kategori");
+  const [selectedTransactionCategory, setSelectedTransactionCategory] =
+    useState("Semua Kategori");
   const [activeTransactionId, setActiveTransactionId] = useState(null);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [transactions, setTransactions] = useState([
     {
       id: 1,
-      category: 'BPJS Kesehatan',
-      subcategory: 'Rekening Bank',
-      date: '12/03/2025',
-      amount: 3600000
+      category: "BPJS Kesehatan",
+      subcategory: "Rekening Bank",
+      date: "12/03/2025",
+      amount: 3600000,
     },
     {
       id: 2,
-      category: 'Pembayaran Online',
-      subcategory: 'Dompet',
-      date: '12/03/2025',
-      amount: 1200000
+      category: "Pembayaran Online",
+      subcategory: "Dompet",
+      date: "12/03/2025",
+      amount: 1200000,
     },
     {
       id: 3,
-      category: 'Hiburan',
-      subcategory: 'Rekening Bank',
-      date: '11/03/2025',
-      amount: 300000
+      category: "Hiburan",
+      subcategory: "Rekening Bank",
+      date: "11/03/2025",
+      amount: 300000,
     },
     {
       id: 4,
-      category: 'Bahan Bakar',
-      subcategory: 'Dompet',
-      date: '10/03/2025',
-      amount: 260000
+      category: "Bahan Bakar",
+      subcategory: "Dompet",
+      date: "10/03/2025",
+      amount: 260000,
     },
     {
       id: 5,
-      category: 'Makan di Luar',
-      subcategory: 'Dompet',
-      date: '10/03/2025',
-      amount: 150000
+      category: "Makan di Luar",
+      subcategory: "Dompet",
+      date: "10/03/2025",
+      amount: 150000,
     },
     {
       id: 6,
-      category: 'Teknologi',
-      subcategory: 'Rekening Bank',
-      date: '10/03/2025',
-      amount: 950000
+      category: "Teknologi",
+      subcategory: "Rekening Bank",
+      date: "10/03/2025",
+      amount: 950000,
     },
     {
       id: 7,
-      category: 'Hadiah',
-      subcategory: 'Dompet',
-      date: '09/03/2025',
-      amount: 270000
+      category: "Hadiah",
+      subcategory: "Dompet",
+      date: "09/03/2025",
+      amount: 270000,
     },
     {
       id: 8,
-      category: 'Gaji',
-      subcategory: 'Rekening Bank',
-      date: '09/03/2025',
-      amount: 12000000
+      category: "Gaji",
+      subcategory: "Rekening Bank",
+      date: "09/03/2025",
+      amount: 12000000,
     },
     {
       id: 9,
-      category: 'Buku / Majalah',
-      subcategory: 'Dompet',
-      date: '08/03/2025',
-      amount: 64000
+      category: "Buku / Majalah",
+      subcategory: "Dompet",
+      date: "08/03/2025",
+      amount: 64000,
     },
     {
       id: 10,
-      category: 'Sepatu, Pakaian',
-      subcategory: 'Rekening Bank',
-      date: '07/03/2025',
-      amount: 450000
-    }
+      category: "Sepatu, Pakaian",
+      subcategory: "Rekening Bank",
+      date: "07/03/2025",
+      amount: 450000,
+    },
   ]);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -141,58 +159,50 @@ const HalamanTransaksi = () => {
 
   // Category data
   const categoryData = [
-    { name: 'Makanan / Minuman', icon: RestaurantIcon, sublist: [] },
-    { name: 'Berbelanja', icon: ShoppingCartIcon, sublist: [] },
+    { name: "Makanan / Minuman", icon: RestaurantIcon, sublist: [] },
+    { name: "Berbelanja", icon: ShoppingCartIcon, sublist: [] },
     {
-      name: 'Transportasi',
+      name: "Transportasi",
       icon: DirectionsCarIcon,
       sublist: [
-        { name: 'Mobil' },
-        { name: 'Motor' },
-        { name: 'Bahan bakar' },
-        { name: 'Asuransi' }
-      ]
+        { name: "Mobil" },
+        { name: "Motor" },
+        { name: "Bahan bakar" },
+        { name: "Asuransi" },
+      ],
     },
-    { name: 'Hiburan', icon: SportsEsportsIcon, sublist: [] },
+    { name: "Hiburan", icon: SportsEsportsIcon, sublist: [] },
     {
-      name: 'Rumah',
+      name: "Rumah",
       icon: HomeIcon,
-      sublist: [
-        { name: 'Tagihan listrik' },
-        { name: 'Tagihan air' }
-      ]
+      sublist: [{ name: "Tagihan listrik" }, { name: "Tagihan air" }],
     },
     {
-      name: 'Keluarga',
+      name: "Keluarga",
       icon: FamilyRestroomIcon,
-      sublist: [
-        { name: 'Anak' },
-        { name: 'Istri' }
-      ]
+      sublist: [{ name: "Anak" }, { name: "Istri" }],
     },
-    { name: 'Kesehatan / Olahraga', icon: FitnessCenterIcon, sublist: [] },
-    { name: 'Hewan Peliharaan', icon: PetsIcon, sublist: [] },
+    { name: "Kesehatan / Olahraga", icon: FitnessCenterIcon, sublist: [] },
+    { name: "Hewan Peliharaan", icon: PetsIcon, sublist: [] },
     {
-      name: 'Liburan',
+      name: "Liburan",
       icon: BeachAccessIcon,
-      sublist: [
-        { name: 'Akomodasi' },
-        { name: 'Transportasi' }
-      ]
+      sublist: [{ name: "Akomodasi" }, { name: "Transportasi" }],
     },
     {
-      name: 'Lain (Pengeluaran)',
+      name: "Lain (Pengeluaran)",
       icon: MoreHorizIcon,
-      sublist: [
-        { name: 'Pajak' }
-      ]
-    }
+      sublist: [{ name: "Pajak" }],
+    },
   ];
 
   // Filter categories based on search query
-  const filteredCategories = categoryData.filter(category =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    category.sublist.some(sub => sub.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredCategories = categoryData.filter(
+    (category) =>
+      category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      category.sublist.some((sub) =>
+        sub.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
   );
 
   // Toggle expanded category
@@ -230,19 +240,31 @@ const HalamanTransaksi = () => {
   const closeCategoryModal = () => {
     setShowCategoryModal(false);
     setExpandedCategory(null);
-    setSearchQuery('');
+    setSearchQuery("");
   };
 
   // Function to handle outside clicks
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showIncomeForm && incomeFormRef.current && !incomeFormRef.current.contains(event.target)) {
+      if (
+        showIncomeForm &&
+        incomeFormRef.current &&
+        !incomeFormRef.current.contains(event.target)
+      ) {
         setShowIncomeForm(false);
       }
-      if (showExpenseForm && expenseFormRef.current && !expenseFormRef.current.contains(event.target)) {
+      if (
+        showExpenseForm &&
+        expenseFormRef.current &&
+        !expenseFormRef.current.contains(event.target)
+      ) {
         setShowExpenseForm(false);
       }
-      if (showCategoryModal && categoryModalRef.current && !categoryModalRef.current.contains(event.target)) {
+      if (
+        showCategoryModal &&
+        categoryModalRef.current &&
+        !categoryModalRef.current.contains(event.target)
+      ) {
         closeCategoryModal();
       }
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -250,26 +272,26 @@ const HalamanTransaksi = () => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
     // Add body scroll lock when forms are open
     if (showIncomeForm || showExpenseForm || showCategoryModal) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'auto';
+      document.body.style.overflow = "auto";
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'auto';
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.body.style.overflow = "auto";
     };
   }, [showIncomeForm, showExpenseForm, showCategoryModal]);
 
   // Function to get current date in DD/MM/YYYY format
   const getCurrentDate = () => {
     const today = new Date();
-    const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, "0");
+    const month = String(today.getMonth() + 1).padStart(2, "0");
     const year = today.getFullYear();
 
     return `${day}/${month}/${year}`;
@@ -278,8 +300,8 @@ const HalamanTransaksi = () => {
   // Function to get current time in HH:MM format
   const getCurrentTime = () => {
     const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
 
     return `${hours}:${minutes}`;
   };
@@ -291,7 +313,7 @@ const HalamanTransaksi = () => {
     formRef,
     onClose,
     fromToLabel,
-    isIncome
+    isIncome,
   }) => {
     const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
@@ -324,9 +346,7 @@ const HalamanTransaksi = () => {
                   readOnly
                   onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
                 />
-                <KeyboardArrowDownIcon
-                  className="absolute right-3 top-3 text-gray-400"
-                />
+                <KeyboardArrowDownIcon className="absolute right-3 top-3 text-gray-400" />
                 {showCategoryDropdown && (
                   <div className="absolute z-10 bg-white border rounded-lg shadow-lg mt-2 w-full max-h-60 overflow-y-auto">
                     {categoryData.map((category, index) => (
@@ -343,38 +363,48 @@ const HalamanTransaksi = () => {
                           }}
                         >
                           <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                            {React.createElement(category.icon, { className: "text-green-500" })}
+                            {React.createElement(category.icon, {
+                              className: "text-green-500",
+                            })}
                           </div>
                           <div className="flex-grow">{category.name}</div>
                           {category.sublist.length > 0 && (
                             <ExpandMoreIcon
-                              className={`transform ${expandedCategory === category.name ? 'rotate-180' : ''}`}
+                              className={`transform ${
+                                expandedCategory === category.name
+                                  ? "rotate-180"
+                                  : ""
+                              }`}
                             />
                           )}
                         </div>
-                        {expandedCategory === category.name && category.sublist.length > 0 && (
-                          <div className="pl-8 bg-gray-50">
-                            {category.sublist.map((subcategory, subIdx) => (
-                              <div
-                                key={subIdx}
-                                className="py-2 px-4 cursor-pointer hover:bg-gray-100"
-                                onClick={() => {
-                                  selectTransactionCategory(category, subcategory);
-                                  setShowCategoryDropdown(false);
-                                }}
-                              >
-                                {subcategory.name}
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                        {expandedCategory === category.name &&
+                          category.sublist.length > 0 && (
+                            <div className="pl-8 bg-gray-50">
+                              {category.sublist.map((subcategory, subIdx) => (
+                                <div
+                                  key={subIdx}
+                                  className="py-2 px-4 cursor-pointer hover:bg-gray-100"
+                                  onClick={() => {
+                                    selectTransactionCategory(
+                                      category,
+                                      subcategory
+                                    );
+                                    setShowCategoryDropdown(false);
+                                  }}
+                                >
+                                  {subcategory.name}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                       </div>
                     ))}
                   </div>
                 )}
               </div>
             </div>
-  
+
             {/* Nilai */}
             <div>
               <label className="block text-sm font-medium mb-1">Nilai</label>
@@ -387,11 +417,15 @@ const HalamanTransaksi = () => {
                 <span className="absolute right-3 text-gray-600">Rp</span>
               </div>
             </div>
-  
+
             {/* Conditional: Return funds checkbox for income only */}
             {isIncome && (
               <div className="flex items-center pl-1">
-                <input type="checkbox" id="pengembalianDana" className="w-4 h-4 mr-2" />
+                <input
+                  type="checkbox"
+                  id="pengembalianDana"
+                  className="w-4 h-4 mr-2"
+                />
                 <label
                   htmlFor="pengembalianDana"
                   className="text-sm text-gray-700"
@@ -400,13 +434,13 @@ const HalamanTransaksi = () => {
                 </label>
               </div>
             )}
-  
+
             {/* Total */}
             <div className="flex justify-between py-2 border-t border-b">
               <span className="text-sm font-medium">Total:</span>
               <span className="font-semibold">Rp 0</span>
             </div>
-  
+
             {/* Rekening */}
             <div>
               <label className="block text-sm font-medium mb-1">Rekening</label>
@@ -415,27 +449,25 @@ const HalamanTransaksi = () => {
                   <option>Dompet</option>
                   <option>Rekening Bank</option>
                 </select>
-                <KeyboardArrowDownIcon
-                  className="absolute right-3 top-3 text-gray-400 pointer-events-none"
-                />
+                <KeyboardArrowDownIcon className="absolute right-3 top-3 text-gray-400 pointer-events-none" />
               </div>
             </div>
-  
+
             {/* Checkbox for "Dicintang" */}
             <div className="flex items-center pl-1">
               <input
                 type="checkbox"
-                id={`dicintang${isIncome ? 'Income' : 'Expense'}`}
+                id={`dicintang${isIncome ? "Income" : "Expense"}`}
                 className="w-4 h-4 mr-2"
               />
               <label
-                htmlFor={`dicintang${isIncome ? 'Income' : 'Expense'}`}
+                htmlFor={`dicintang${isIncome ? "Income" : "Expense"}`}
                 className="text-sm text-gray-700"
               >
                 Dicintang
               </label>
             </div>
-  
+
             {/* Tanggal */}
             <div>
               <label className="block text-sm font-medium mb-1">Tanggal</label>
@@ -445,12 +477,10 @@ const HalamanTransaksi = () => {
                   className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
                   defaultValue={getCurrentDate()}
                 />
-                <CalendarTodayIcon
-                  className="absolute right-3 top-3 text-gray-400"
-                />
+                <CalendarTodayIcon className="absolute right-3 top-3 text-gray-400" />
               </div>
             </div>
-  
+
             {/* Waktu */}
             <div>
               <label className="block text-sm font-medium mb-1">Waktu</label>
@@ -460,37 +490,42 @@ const HalamanTransaksi = () => {
                 defaultValue={getCurrentTime()}
               />
             </div>
-  
+
             {/* From/To (Conditional label) */}
             <div>
-              <label className="block text-sm font-medium mb-1">{fromToLabel} (Opsional)</label>
+              <label className="block text-sm font-medium mb-1">
+                {fromToLabel} (Opsional)
+              </label>
               <input
                 type="text"
                 className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
               />
             </div>
-  
+
             {/* Catatan (Opsional) */}
             <div>
-              <label className="block text-sm font-medium mb-1">Catatan (Opsional)</label>
-              <textarea
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none h-24 resize-none"
-              />
+              <label className="block text-sm font-medium mb-1">
+                Catatan (Opsional)
+              </label>
+              <textarea className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none h-24 resize-none" />
             </div>
-  
+
             {/* Buttons */}
             <div className="flex justify-end space-x-3 mt-6 sticky bottom-0 pb-1 pt-3 bg-white border-t">
               <button
                 onClick={onClose}
                 className={`px-5 py-2.5 border border-${color}-500 rounded-lg text-${color}-500 font-medium hover:bg-${color}-50 transition-colors`}
-                style={{ color: isIncome ? '#10B981' : '#EF4444', borderColor: isIncome ? '#10B981' : '#EF4444' }}
+                style={{
+                  color: isIncome ? "#10B981" : "#EF4444",
+                  borderColor: isIncome ? "#10B981" : "#EF4444",
+                }}
               >
                 Batal
               </button>
               <button
                 onClick={onClose}
                 className={`px-5 py-2.5 bg-${color}-500 text-white rounded-lg font-medium hover:bg-${color}-600 transition-colors`}
-                style={{ backgroundColor: isIncome ? '#10B981' : '#EF4444' }}
+                style={{ backgroundColor: isIncome ? "#10B981" : "#EF4444" }}
               >
                 Simpan
               </button>
@@ -500,9 +535,11 @@ const HalamanTransaksi = () => {
       </div>
     );
   };
-  
+
   const handleToggleOptions = (transactionId) => {
-    setActiveTransactionId((prev) => (prev === transactionId ? null : transactionId));
+    setActiveTransactionId((prev) =>
+      prev === transactionId ? null : transactionId
+    );
   };
 
   const handleEditTransaction = (transaction) => {
@@ -524,18 +561,24 @@ const HalamanTransaksi = () => {
               {/* Main content */}
               <div className="flex-1">
                 <div className="font-medium">{transaction.category}</div>
-                <div className="text-gray-500 text-sm">{transaction.subcategory}</div>
+                <div className="text-gray-500 text-sm">
+                  {transaction.subcategory}
+                </div>
               </div>
 
               {/* Date */}
-              <div className="text-sm text-gray-600 mr-4">{transaction.date}</div>
+              <div className="text-sm text-gray-600 mr-4">
+                {transaction.date}
+              </div>
 
               {/* Amount */}
               <div
-                className={`text-right mr-2 font-medium ${transaction.id === 8 ? 'text-green-500' : 'text-red-500'
-                  }`}
+                className={`text-right mr-2 font-medium ${
+                  transaction.id === 8 ? "text-green-500" : "text-red-500"
+                }`}
               >
-                {transaction.id === 8 ? '+' : '-'} Rp {transaction.amount.toLocaleString()}
+                {transaction.id === 8 ? "+" : "-"} Rp{" "}
+                {transaction.amount.toLocaleString()}
               </div>
 
               {/* More Options Button */}
@@ -645,15 +688,15 @@ const HalamanTransaksi = () => {
                 id="pengeluaran"
                 className="w-4 h-4 mr-2"
               />
-              <label htmlFor="pengeluaran" className="text-sm">Pengeluaran</label>
+              <label htmlFor="pengeluaran" className="text-sm">
+                Pengeluaran
+              </label>
             </div>
             <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="pemasukan"
-                className="w-4 h-4 mr-2"
-              />
-              <label htmlFor="pemasukan" className="text-sm">Pemasukan</label>
+              <input type="checkbox" id="pemasukan" className="w-4 h-4 mr-2" />
+              <label htmlFor="pemasukan" className="text-sm">
+                Pemasukan
+              </label>
             </div>
           </div>
         </div>
@@ -714,7 +757,7 @@ const HalamanTransaksi = () => {
           <div
             ref={categoryModalRef}
             className="w-full max-w-md rounded shadow-lg z-10 relative"
-            style={{ backgroundColor: '#f7f7f7' }}
+            style={{ backgroundColor: "#f7f7f7" }}
           >
             <div className="text-center font-semibold text-xl p-4 border-b">
               PILIH KATEGORI
@@ -740,33 +783,44 @@ const HalamanTransaksi = () => {
                 <div key={index} className="border-b">
                   <div
                     className="flex items-center p-3 cursor-pointer hover:bg-gray-100"
-                    onClick={() => category.sublist.length > 0
-                      ? toggleExpandCategory(category.name)
-                      : selectCategory(category)}
+                    onClick={() =>
+                      category.sublist.length > 0
+                        ? toggleExpandCategory(category.name)
+                        : selectCategory(category)
+                    }
                   >
                     <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                      {React.createElement(category.icon, { className: "text-green-500" })}
+                      {React.createElement(category.icon, {
+                        className: "text-green-500",
+                      })}
                     </div>
                     <div className="flex-grow">{category.name}</div>
                     {category.sublist.length > 0 && (
-                      <ExpandMoreIcon className={`transform ${expandedCategory === category.name ? 'rotate-180' : ''}`} />
+                      <ExpandMoreIcon
+                        className={`transform ${
+                          expandedCategory === category.name ? "rotate-180" : ""
+                        }`}
+                      />
                     )}
                   </div>
 
                   {/* Sublist items if expanded */}
-                  {expandedCategory === category.name && category.sublist.length > 0 && (
-                    <div className="pl-16 bg-gray-50">
-                      {category.sublist.map((subcategory, subIdx) => (
-                        <div
-                          key={subIdx}
-                          className="py-2 px-4 cursor-pointer hover:bg-gray-100"
-                          onClick={() => selectCategory(category, subcategory)}
-                        >
-                          {subcategory.name}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  {expandedCategory === category.name &&
+                    category.sublist.length > 0 && (
+                      <div className="pl-16 bg-gray-50">
+                        {category.sublist.map((subcategory, subIdx) => (
+                          <div
+                            key={subIdx}
+                            className="py-2 px-4 cursor-pointer hover:bg-gray-100"
+                            onClick={() =>
+                              selectCategory(category, subcategory)
+                            }
+                          >
+                            {subcategory.name}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                 </div>
               ))}
             </div>
@@ -800,23 +854,33 @@ const HalamanTransaksi = () => {
               }}
             >
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Kategori</label>
+                <label className="block text-sm font-medium mb-1">
+                  Kategori
+                </label>
                 <input
                   type="text"
                   value={editingTransaction.category}
                   onChange={(e) =>
-                    setEditingTransaction({ ...editingTransaction, category: e.target.value })
+                    setEditingTransaction({
+                      ...editingTransaction,
+                      category: e.target.value,
+                    })
                   }
                   className="w-full p-2 border rounded"
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Subkategori</label>
+                <label className="block text-sm font-medium mb-1">
+                  Subkategori
+                </label>
                 <input
                   type="text"
                   value={editingTransaction.subcategory}
                   onChange={(e) =>
-                    setEditingTransaction({ ...editingTransaction, subcategory: e.target.value })
+                    setEditingTransaction({
+                      ...editingTransaction,
+                      subcategory: e.target.value,
+                    })
                   }
                   className="w-full p-2 border rounded"
                 />
@@ -827,18 +891,26 @@ const HalamanTransaksi = () => {
                   type="number"
                   value={editingTransaction.amount}
                   onChange={(e) =>
-                    setEditingTransaction({ ...editingTransaction, amount: parseInt(e.target.value) })
+                    setEditingTransaction({
+                      ...editingTransaction,
+                      amount: parseInt(e.target.value),
+                    })
                   }
                   className="w-full p-2 border rounded"
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Tanggal</label>
+                <label className="block text-sm font-medium mb-1">
+                  Tanggal
+                </label>
                 <input
                   type="date"
                   value={editingTransaction.date}
                   onChange={(e) =>
-                    setEditingTransaction({ ...editingTransaction, date: e.target.value })
+                    setEditingTransaction({
+                      ...editingTransaction,
+                      date: e.target.value,
+                    })
                   }
                   className="w-full p-2 border rounded"
                 />
@@ -851,7 +923,10 @@ const HalamanTransaksi = () => {
                 >
                   Batal
                 </button>
-                <button type="submit" className="px-4 py-2 bg-green-500 text-white rounded">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-500 text-white rounded"
+                >
                   Simpan
                 </button>
               </div>
@@ -867,8 +942,12 @@ const HalamanTransaksi = () => {
               HAPUS TRANSAKSI "{deletingTransaction.category.toUpperCase()}"?
             </h2>
             <div className="mb-4">
-              <p className="mb-1">Subkategori: {deletingTransaction.subcategory}</p>
-              <p className="mb-1">Jumlah: Rp {deletingTransaction.amount.toLocaleString()}</p>
+              <p className="mb-1">
+                Subkategori: {deletingTransaction.subcategory}
+              </p>
+              <p className="mb-1">
+                Jumlah: Rp {deletingTransaction.amount.toLocaleString()}
+              </p>
               <p className="mb-1">Tanggal: {deletingTransaction.date}</p>
             </div>
             <div className="flex justify-between mt-8">

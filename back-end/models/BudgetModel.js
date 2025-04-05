@@ -14,12 +14,9 @@ const Budgets = db.define(
       validate: {
         notEmpty: true,
       },
-    },
-    category_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        notEmpty: true,
+    categoryId: {
+      type: DataTypes.INTEGER,  // Ensure this is defined
+      allowNull: true,          // Optional, remove if category is required
       },
     },
     period: {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from "react-router-dom";
 import { getMe } from '../../features/authSlice';
+import axios from "axios";
 import AddCircle from "@mui/icons-material/AddCircle";
 import Edit from "@mui/icons-material/Edit";
 import Delete from "@mui/icons-material/Delete";
@@ -43,7 +44,6 @@ function Anggaran() {
     }
   }, [isError, navigate]);
   
-
 
   // Initial budget data
   const initialWeeklyBudgets = [
@@ -125,15 +125,19 @@ function Anggaran() {
   ];
 
   // State for weekly and monthly budgets
-  const [weeklyBudgets, setWeeklyBudgets] = useState(initialWeeklyBudgets);
-  const [monthlyBudgets, setMonthlyBudgets] = useState(initialMonthlyBudgets);
+  const [weeklyBudgets, setWeeklyBudgets] = useState([]);
+  const [monthlyBudgets, setMonthlyBudgets] = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingBudget, setEditingBudget] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingBudget, setDeletingBudget] = useState(null);
   const [formValues, setFormValues] = useState({
     total: "",
-    category: "",
+    category: {
+      id:"",
+      name: ""
+    },
     source: "All accounts",
   });
 
@@ -142,52 +146,78 @@ function Anggaran() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCategory, setExpandedCategory] = useState("");
 
+  useEffect(() => {
+    fetchBudgets();
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchBudgets = async () => {
+    try {
+      const weekly = await axios.get('http://localhost:5000/budgets/period/weekly');
+      const monthly = await axios.get('http://localhost:5000/budgets/period/monthly');
+      setWeeklyBudgets(weekly.data);
+      setMonthlyBudgets(monthly.data);
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const categories = await axios.get('http://localhost:5000/category');
+      setCategoryData(categories.data);
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
   // Category data with icons - updated as specified
-  const categoryData = [
-    { name: "Makanan / Minuman", icon: RestaurantIcon, sublist: [] },
-    { name: "Berbelanja", icon: ShoppingCartIcon, sublist: [] },
-    {
-      name: "Transportasi",
-      icon: DirectionsCarIcon,
-      sublist: [
-        { name: "Mobil" },
-        { name: "Motor" },
-        { name: "Bahan bakar" },
-        { name: "Asuransi" },
-      ],
-    },
-    { name: "Hiburan", icon: SportsEsportsIcon, sublist: [] },
-    {
-      name: "Rumah",
-      icon: HomeIcon,
-      sublist: [{ name: "Tagihan listrik" }, { name: "Tagihan air" }],
-    },
-    {
-      name: "Keluarga",
-      icon: FamilyRestroomIcon,
-      sublist: [{ name: "Anak" }, { name: "Istri" }],
-    },
-    { name: "Kesehatan / Olahraga", icon: FitnessCenterIcon, sublist: [] },
-    { name: "Hewan Peliharaan", icon: PetsIcon, sublist: [] },
-    {
-      name: "Liburan",
-      icon: BeachAccessIcon,
-      sublist: [{ name: "Akomodasi" }, { name: "Transportasi" }],
-    },
-    {
-      name: "Lain (Pengeluaran)",
-      icon: MoreHorizIcon,
-      sublist: [{ name: "Pajak" }],
-    },
-  ];
+  // const categoryData = [
+  //   { name: "Makanan / Minuman", icon: RestaurantIcon, sublist: [] },
+  //   { name: "Berbelanja", icon: ShoppingCartIcon, sublist: [] },
+  //   {
+  //     name: "Transportasi",
+  //     icon: DirectionsCarIcon,
+  //     sublist: [
+  //       { name: "Mobil" },
+  //       { name: "Motor" },
+  //       { name: "Bahan bakar" },
+  //       { name: "Asuransi" },
+  //     ],
+  //   },
+  //   { name: "Hiburan", icon: SportsEsportsIcon, sublist: [] },
+  //   {
+  //     name: "Rumah",
+  //     icon: HomeIcon,
+  //     sublist: [{ name: "Tagihan listrik" }, { name: "Tagihan air" }],
+  //   },
+  //   {
+  //     name: "Keluarga",
+  //     icon: FamilyRestroomIcon,
+  //     sublist: [{ name: "Anak" }, { name: "Istri" }],
+  //   },
+  //   { name: "Kesehatan / Olahraga", icon: FitnessCenterIcon, sublist: [] },
+  //   { name: "Hewan Peliharaan", icon: PetsIcon, sublist: [] },
+  //   {
+  //     name: "Liburan",
+  //     icon: BeachAccessIcon,
+  //     sublist: [{ name: "Akomodasi" }, { name: "Transportasi" }],
+  //   },
+  //   {
+  //     name: "Lain (Pengeluaran)",
+  //     icon: MoreHorizIcon,
+  //     sublist: [{ name: "Pajak" }],
+  //   },
+  // ];
+
 
   // Filter categories based on search query
   const filteredCategories = categoryData.filter(
     (category) =>
-      category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      category.sublist.some((sub) =>
-        sub.name.toLowerCase().includes(searchQuery.toLowerCase())
-      )
+      category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Function to toggle category expansion
@@ -200,11 +230,14 @@ function Anggaran() {
   };
 
   // Function to select a category
-  const selectCategory = (category, subcategory = null) => {
-    const selectedCategory = subcategory ? subcategory.name : category.name;
+  const selectCategory = (category) => {
     setFormValues({
       ...formValues,
-      category: selectedCategory,
+      category:{
+        id: category.id,
+        name: category.name
+      }
+      
     });
     closeCategoryModal();
   };
@@ -244,8 +277,11 @@ function Anggaran() {
   const handleEditClick = (budget) => {
     setEditingBudget(budget);
     setFormValues({
-      total: budget.total,
-      category: budget.name,
+      total: budget.amount,
+      category:{
+        id: budget.category.id,
+        name: budget.category.name
+      },
       source: "All accounts",
     });
     setShowEditModal(true);
@@ -279,49 +315,62 @@ function Anggaran() {
   };
 
   // Function to save edited budget
-  const handleSaveBudget = () => {
-    if (editingBudget) {
-      const updatedBudget = {
-        ...editingBudget,
-        total: parseFloat(formValues.total) || editingBudget.total,
-        name: formValues.category || editingBudget.name,
-      };
-
-      if (updatedBudget.duration === "Anggaran Mingguan") {
-        setWeeklyBudgets(
-          weeklyBudgets.map((budget) =>
-            budget.id === updatedBudget.id ? updatedBudget : budget
-          )
-        );
-      } else {
-        setMonthlyBudgets(
-          monthlyBudgets.map((budget) =>
-            budget.id === updatedBudget.id ? updatedBudget : budget
-          )
-        );
+  const handleSaveBudget = async (budgetId) => {
+    try {
+      if (editingBudget) {
+        const updatedBudget = {
+          ...editingBudget,
+          amount: parseFloat(formValues.total) || editingBudget.amount,
+          category: {
+            id: formValues.category.id, // Store the category ID
+            name: formValues.category.name || editingBudget.category.name, // Store the category name
+          },
+        };
+  
+        // Update the state directly
+        if (updatedBudget.period === "weekly") {
+          setWeeklyBudgets((prev) =>
+            prev.map((budget) =>
+              budget.id === updatedBudget.id ? updatedBudget : budget
+            )
+          );
+        } else {
+          setMonthlyBudgets((prev) =>
+            prev.map((budget) =>
+              budget.id === updatedBudget.id ? updatedBudget : budget
+            )
+          );
+        }
       }
+  
+      // Send the updated data to the backend
+      await axios.patch(`http://localhost:5000/budgets/${budgetId}`, {
+        amount: formValues.total,
+        category_id: formValues.category.id,
+      });
+  
+      // Close the modal and reset editing state
+      setShowEditModal(false);
+      setEditingBudget(null);
+    } catch (error) {
+      console.error("Failed to save budget:", error.message);
     }
-
-    setShowEditModal(false);
-    setEditingBudget(null);
   };
 
   // Function to confirm budget deletion
-  const handleConfirmDelete = () => {
-    if (deletingBudget) {
-      if (deletingBudget.duration === "Anggaran Mingguan") {
-        setWeeklyBudgets(
-          weeklyBudgets.filter((budget) => budget.id !== deletingBudget.id)
-        );
-      } else {
-        setMonthlyBudgets(
-          monthlyBudgets.filter((budget) => budget.id !== deletingBudget.id)
-        );
-      }
+  const handleConfirmDelete = async (budgetId) => {
+    setWeeklyBudgets((prev) => prev.filter((budget) => budget.uuid !== budgetId));
+    setMonthlyBudgets((prev) => prev.filter((budget) => budget.uuid !== budgetId));
+  
+    try {
+      await axios.delete(`http://localhost:5000/budgets/${budgetId}`);
+      setShowDeleteModal(false);
+      setDeletingBudget(null);
+      fetchBudgets();
+    } catch (error) {
+      console.error("Failed to delete budget:", error.message);
+      fetchBudgets();
     }
-
-    setShowDeleteModal(false);
-    setDeletingBudget(null);
   };
 
   // Function to format currency to Rupiah
@@ -340,22 +389,18 @@ function Anggaran() {
       <h2 className="text-lg font-semibold mb-4">{title}</h2>
       <div className="space-y-3">
         {budgets.map((item) => (
-          <div key={item.id} className="bg-white rounded-lg p-4 shadow-sm">
+          <div key={item.uuid} className="bg-white rounded-lg p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <input type="checkbox" className="rounded border-gray-300" />
-                <div className="p-2 bg-gray-100 rounded-full">
-                  <item.icon sx={{ fontSize: 20 }} className="text-gray-600" />
-                </div>
                 <div>
-                  <h3 className="font-medium">{item.name}</h3>
-                  <p className="text-sm text-gray-500">{item.date}</p>
+                  <h3 className="font-medium">{item.category.name}</h3>
+                  <p className="text-sm text-gray-500">{item.start_date}</p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
                 <p className="text-sm">
-                  Rp {item.current.toLocaleString()} / Rp{" "}
-                  {item.total.toLocaleString()}
+                  {formatToRupiah(item.amount)}
                 </p>
                 <div className="flex space-x-2">
                   <button
@@ -406,7 +451,7 @@ function Anggaran() {
               <h2 className="text-xl font-bold text-center mb-4">
                 EDIT ANGGARAN
               </h2>
-              <p className="mb-4">Durasi: {editingBudget.duration}</p>
+              <p className="mb-4">Durasi: {editingBudget.period}</p>
 
               <div className="mb-4">
                 <div className="flex items-center mb-2">
@@ -434,7 +479,7 @@ function Anggaran() {
                   className="border rounded p-2 w-full cursor-pointer flex justify-between items-center"
                   onClick={openCategoryModal}
                 >
-                  <span>{formValues.category || "Pilih kategori"}</span>
+                  <span>{formValues.category.name || "Pilih kategori"}</span>
                   <ExpandMoreIcon />
                 </div>
               </div>
@@ -462,7 +507,7 @@ function Anggaran() {
                 </button>
                 <button
                   className="bg-green-500 text-white font-medium px-6 py-2 rounded"
-                  onClick={handleSaveBudget}
+                  onClick={() => handleSaveBudget(editingBudget.uuid)}
                 >
                   SIMPAN
                 </button>
@@ -479,14 +524,14 @@ function Anggaran() {
               style={{ backgroundColor: "#f7f7f7" }}
             >
               <h2 className="text-xl font-bold text-center mb-6">
-                HAPUS "{deletingBudget.name.toUpperCase()}" ANGGARAN?
+                HAPUS "{deletingBudget.category.name.toUpperCase()}" ANGGARAN?
               </h2>
 
               <div className="mb-4">
                 <p className="mb-1">
-                  Jumlah Anggaran: Rp {deletingBudget.total.toLocaleString()}
+                  Jumlah Anggaran: {formatToRupiah(deletingBudget.amount)}
                 </p>
-                <p className="mb-1">Durasi: {deletingBudget.duration}</p>
+                <p className="mb-1">Durasi: {deletingBudget.period}</p>
               </div>
 
               <div className="flex justify-between mt-8">
@@ -498,7 +543,7 @@ function Anggaran() {
                 </button>
                 <button
                   className="bg-red-500 text-white font-medium px-6 py-2 rounded"
-                  onClick={handleConfirmDelete}
+                  onClick={() => handleConfirmDelete(deletingBudget.uuid)}
                 >
                   OK
                 </button>
@@ -542,18 +587,18 @@ function Anggaran() {
                     <div
                       className="flex items-center p-3 cursor-pointer hover:bg-gray-100"
                       onClick={() =>
-                        category.sublist.length > 0
-                          ? toggleExpandCategory(category.name)
-                          : selectCategory(category)
+                        /* category.sublist.length > 0
+                           ? toggleExpandCategory(category.name)
+                           :*/ selectCategory(category)
                       }
                     >
-                      <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                      {/* <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
                         {React.createElement(category.icon, {
                           className: "text-green-500",
                         })}
-                      </div>
+                      </div> */}
                       <div className="flex-grow">{category.name}</div>
-                      {category.sublist.length > 0 && (
+                      {/* {category.sublist.length > 0 && (
                         <ExpandMoreIcon
                           className={`transform ${
                             expandedCategory === category.name
@@ -561,11 +606,11 @@ function Anggaran() {
                               : ""
                           }`}
                         />
-                      )}
+                      )} */}
                     </div>
 
                     {/* Sublist items if expanded */}
-                    {expandedCategory === category.name &&
+                    {/* {expandedCategory === category.name &&
                       category.sublist.length > 0 && (
                         <div className="pl-16 bg-gray-50">
                           {category.sublist.map((subcategory, subIdx) => (
@@ -580,7 +625,7 @@ function Anggaran() {
                             </div>
                           ))}
                         </div>
-                      )}
+                      )} */}
                   </div>
                 ))}
               </div>

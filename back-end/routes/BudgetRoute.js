@@ -6,7 +6,8 @@ import {
     updateBudget,
     deleteBudget,
     filterBudgetByCategory,
-    filterBudgetByDate
+    filterBudgetByDate,
+    filterBudgetByPeriod
 } from '../controllers/Budgets.js';
 import { verifyUser } from '../middleware/AuthUser.js';
 
@@ -19,5 +20,6 @@ router.patch('/budgets/:id', verifyUser, updateBudget);
 router.delete('/budgets/:id', verifyUser, deleteBudget);
 router.get('/budget/:category_id', verifyUser, filterBudgetByCategory);
 router.post('/budgets/filter-date', verifyUser, filterBudgetByDate);
+router.get('/budgets/period/:period', verifyUser, filterBudgetByPeriod)
 
 export default router;

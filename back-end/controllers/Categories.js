@@ -17,7 +17,7 @@ export const getCategories = async (req, res) => {
     }
     const response = await Categories.findAll({
       where,
-      attributes: ["uuid", "name", "type"],
+      attributes: ["id", "uuid", "name", "type"],
       include: [
         {
           model: Users,

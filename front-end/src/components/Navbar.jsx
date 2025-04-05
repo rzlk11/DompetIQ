@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { LogOut, reset } from '../features/authSlice';
 import { useNavigate, useLocation } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -13,11 +15,20 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [pageTitle, setPageTitle] = useState('Dashboard'); // State to store current page title
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
   
   // Create refs for dropdown containers
   const searchRef = useRef(null);
   const notificationsRef = useRef(null);
   const profileMenuRef = useRef(null);
+
+    const handleLogout = () => {
+      // Add any logout logic here (clear tokens, etc.)
+      dispatch(LogOut());
+      dispatch(reset());
+      navigate('/login');
+    };
   
   // Update page title based on current route
   useEffect(() => {
@@ -203,8 +214,8 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
           {showProfileMenu && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
               <div className="p-4 border-b">
-                <p className="font-medium">Suparno</p>
-                <p className="text-sm text-gray-500">suparno123@gmail.com</p>
+                <p className="font-medium">{user.username}</p>
+                <p className="text-sm text-gray-500">{user.email}</p>
               </div>
               <div>
                 <button 
@@ -221,7 +232,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
                 </button>
                 <button 
                   className="block w-full text-left px-4 py-2 hover:bg-gray-50"
-                  onClick={() => navigate('/')}
+                  onClick={handleLogout}
                 >
                   Logout
                 </button>

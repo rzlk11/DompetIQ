@@ -81,11 +81,11 @@ POST http://localhost:5000/budgets
 Content-Type: application/json
 
 {
-    "category_id": 1,
     "period": "weekly",
-    "amount": 200000,
+    "amount": 500000,
     "start_date": "2025-03-26",
-    "end_date": "2025-03-27"
+    "end_date": "2025-03-27",
+    "categoryId": 2
 }
 
 ###
@@ -94,13 +94,36 @@ GET http://localhost:5000/budgets/5eef6744-da5e-4c5b-a435-d4958e1b6884
 
 ###
 //update budget
-PATCH http://localhost:5000/budgets/5eef6744-da5e-4c5b-a435-d4958e1b6884
+PATCH http://localhost:5000/budgets/f1b8d6e9-3fbc-4e99-9d37-7bf51c447006
 Content-Type: application/json
 
 {
-    "category_id": 1,
     "period": "weekly",
     "amount": 300000,
     "start_date": "2025-03-26",
-    "end_date": "2025-03-27"
+    "end_date": "2025-03-27",
+    "category_id": 2
 }
+
+###
+//get monthly budgets
+GET http://localhost:5000/budgets/period/monthly
+
+###
+//get weekly budgets
+GET http://localhost:5000/budgets/period/weekly
+
+
+###
+//create category
+POST http://localhost:5000/category
+Content-Type: application/json
+
+{
+    "name": "listrik",
+    "type": "expense"
+}
+
+###
+//GET category
+GET http://localhost:5000/category

@@ -1,12 +1,13 @@
 import Budgets from "../models/BudgetModel.js";
 import Users from "../models/UserModel.js";
+import Categories from "../models/CategoryModel.js";
 import { Op } from "sequelize";
 
 export const createBudget = async (req, res) => {
   try {
-    const { category_id, period, amount, start_date, end_date } = req.body;
+    const { categoryId, period, amount, start_date, end_date } = req.body;
     await Budgets.create({
-      category_id: category_id,
+      categoryId: categoryId,
       period: period,
       amount: amount,
       start_date: start_date,
@@ -27,7 +28,6 @@ export const getBudgets = async (req, res) => {
       },
       attributes: [
         "uuid",
-        "category_id",
         "amount",
         "period",
         "start_date",
@@ -38,6 +38,10 @@ export const getBudgets = async (req, res) => {
           model: Users,
           attributes: ["username", "email"],
         },
+        {
+          model: Categories,
+          attributes: ["id","name"],
+        }
       ],
     });
     res.status(200).json(budgets);
@@ -66,6 +70,10 @@ export const getBudgetById = async (req, res) => {
           model: Users,
           attributes: ["username", "email"],
         },
+        {
+          model: Categories,
+          attributes: ["id","name"],
+        }
       ],
     });
     if (!budget)
@@ -80,6 +88,7 @@ export const getBudgetById = async (req, res) => {
 
 export const updateBudget = async (req, res) => {
   const { category_id, period, amount, start_date, end_date } = req.body;
+  const categoryId = category_id;
   const budget = await Budgets.findOne({
     where: {
       userId: req.userId,
@@ -91,11 +100,11 @@ export const updateBudget = async (req, res) => {
   try {
     await Budgets.update(
       {
-        category_id,
+        categoryId,
         period,
         amount,
         start_date,
-        end_date,
+        end_date
       },
       {
         where: {
@@ -138,8 +147,18 @@ export const filterBudgetByCategory = async (req, res) => {
     const budgets = await Budgets.findAll({
       where: {
         userId: req.userId,
-        category_id: category_id,
+        categoryId: category_id,
       },
+      include: [
+        {
+          model: Users,
+          attributes: ["username", "email"],
+        },
+        {
+          model: Categories,
+          attributes: ["name"],
+        }
+      ]
     });
     if (!budgets)
       return res
@@ -160,13 +179,51 @@ export const filterBudgetByDate = async (req, res) => {
         userId: req.userId,
         createdAt: {[Op.between]: [start_date, end_date]},
       },
+      include: [
+        {
+          model: Users,
+          attributes: ["username", "email"],
+        },
+        {
+          model: Categories,
+          attributes: ["name"],
+        }
+      ]
     });
     if (!budgets)
       return res
         .status(404)
         .json({ error: "Budget with this range of date not found" });
-        res.status(200).json({})
+        res.status(200).json(budgets);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const filterBudgetByPeriod = async (req, res) => {
+  try {
+    const period = req.params.period;
+    const budgets = await Budgets.findAll({
+      where: {
+        userId: req.userId,
+        period: period
+      },
+      include: [
+        {
+          model: Users,
+          attributes: ["username", "email"],
+        },
+        {
+          model: Categories,
+          attributes: ["name"],
+        }
+      ]
+    });
+    if(!budgets)
+      return res.status(404).json({ error: "Weekly budget not found" });
+    res.status(200).json(budgets);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+

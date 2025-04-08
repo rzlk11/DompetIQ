@@ -17,12 +17,13 @@ export const verifyUser = async (req, res, next) => {
 
 // verifikasi apakah user memiliki otorisasi untuk akses data
 export const authorized = async (req, res, next) => {
-    const user = await Users.findOne({
-        where: {
-            uuid: req.session.userId
-        }
-    });
-    if (!user) return res.status(404).json({ error: "User not found!" });
-    if(user.uuid !== req.params.id) return res.status(403).json({error: "Access Forbidden"});
-    next();
-}
+  const user = await Users.findOne({
+    where: {
+      uuid: req.session.userId,
+    },
+  });
+  if (!user) return res.status(404).json({ error: "User not found!" });
+  if (user.uuid !== req.params.id)
+    return res.status(403).json({ error: "Access Forbidden" });
+  next();
+};

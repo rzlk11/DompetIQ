@@ -17,6 +17,9 @@ import Anggaran from './pages/Budgets/MainAnggaran';
 import BudgetForm from './pages/Budgets/TambahAnggaran';
 import KelolaKategori from './pages/Kategori/KelolaKategori';
 
+import Kalender from './pages/Kalender/Kalender';
+
+
 
 function App() {
   return (
@@ -35,6 +38,9 @@ function App() {
         {/* Rute untuk Anggaran */}
         <Route path='/anggaran' element={<Anggaran />} />
         <Route path='/anggaran/tambah' element={<BudgetForm />} />
+
+        {/* {Rute untuk Kalender} */}
+        <Route path='/kalender' element={<Kalender />} />
 
         {/* Rute untuk Kategori */}
         <Route path='/kategori/kelola' element={<KelolaKategori />} />

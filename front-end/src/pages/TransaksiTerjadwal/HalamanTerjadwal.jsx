@@ -1,957 +1,656 @@
-import React, { useState, useRef, useEffect } from 'react';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import CloseIcon from '@mui/icons-material/Close';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import SearchIcon from '@mui/icons-material/Search';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import RestaurantIcon from '@mui/icons-material/Restaurant';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import DirectionsCarIcon from '@mui/icons-material/DirectionsCar';
-import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
-import HomeIcon from '@mui/icons-material/Home';
-import FamilyRestroomIcon from '@mui/icons-material/FamilyRestroom';
-import FitnessCenterIcon from '@mui/icons-material/FitnessCenter';
-import PetsIcon from '@mui/icons-material/Pets';
-import BeachAccessIcon from '@mui/icons-material/BeachAccess';
-import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import React, { useState, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { getMe } from "../../features/authSlice";
+import axios from "axios";
+import { 
+  KeyboardArrowLeft, KeyboardArrowRight, MoreVert, 
+  Add, Remove, CalendarToday, KeyboardArrowDown,
+  Close, Search, ExpandMore, Edit, Delete
+} from "@mui/icons-material";
 
 const HalamanTerjadwal = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isError, user, token } = useSelector((state) => state.auth);
+  const [scheduledTransactions, setScheduledTransactions] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [showIncomeForm, setShowIncomeForm] = useState(false);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
-  const [showSortingPanel, setShowSortingPanel] = useState(false);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [expandedCategory, setExpandedCategory] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Semua Kategori');
-  const [selectedTransactionCategory, setSelectedTransactionCategory] = useState('Semua Kategori');
-  const [editingTransaction, setEditingTransaction] = useState(null);
-  const [activeTransactionId, setActiveTransactionId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletingTransaction, setDeletingTransaction] = useState(null);
-  const [scheduledTransactions, setScheduledTransactions] = useState([
-    {
-      id: 1,
-      category: 'Rumah',
-      subcategory: 'Rekening Bank',
-      date: '17/03/2025',
-      amount: 1200000,
-      type: 'expense'
-    },
-    {
-      id: 2,
-      category: 'Tagihan Listrik',
-      subcategory: 'Dompet',
-      date: '17/03/2025',
-      amount: 650000,
-      type: 'expense'
-    },
-    {
-      id: 3,
-      category: 'Lain (Pengeluaran)',
-      subcategory: 'Dompet',
-      date: '18/03/2025',
-      amount: 900000,
-      type: 'expense'
-    },
-    {
-      id: 4,
-      category: 'Transportasi',
-      subcategory: 'Rekening Bank',
-      date: '20/03/2025',
-      amount: 70000,
-      type: 'expense'
-    },
-    {
-      id: 5,
-      category: 'Gaji',
-      subcategory: 'Rekening Bank',
-      date: '21/03/2025',
-      amount: 12000000,
-      type: 'income'
-    },
-    {
-      id: 6,
-      category: 'Bahan Bakar',
-      subcategory: 'Dompet',
-      date: '30/03/2025',
-      amount: 360000,
-      type: 'expense'
-    },
-    {
-      id: 7,
-      category: 'Teknologi',
-      subcategory: 'Rekening Bank',
-      date: '01/04/2025',
-      amount: 900000,
-      type: 'expense'
-    },
-    {
-      id: 8,
-      category: 'Hadiah',
-      subcategory: 'Dompet',
-      date: '01/04/2025',
-      amount: 150000,
-      type: 'expense'
-    },
-    {
-      id: 9,
-      category: 'Hiburan',
-      subcategory: 'Dompet',
-      date: '02/04/2025',
-      amount: 230000,
-      type: 'expense'
-    },
-    {
-      id: 10,
-      category: 'Berbelanja',
-      subcategory: 'Rekening Bank',
-      date: '03/04/2025',
-      amount: 550000,
-      type: 'expense'
-    }
-  ]);
+  const [activeTransactionId, setActiveTransactionId] = useState(null);
+  const [editingTransaction, setEditingTransaction] = useState(null);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [categoryError, setCategoryError] = useState(null);
+  
+  const [formData, setFormData] = useState({
+    amount: "",
+    type: "expense",
+    period: "monthly",
+    start_date: "",
+    end_date: "",
+    description: "",
+    category_name: ""
+  });
 
-  // Create refs for the forms
+  const [filters, setFilters] = useState({
+    start_date: '',
+    end_date: '',
+    type: '',
+    category: '',
+    period: ''
+  });
+
   const incomeFormRef = useRef(null);
   const expenseFormRef = useRef(null);
-  const sortingPanelRef = useRef(null);
-  const categoryModalRef = useRef(null);
   const dropdownRef = useRef(null);
 
-  // Category data
-  const categoryData = [
-    { name: 'Makanan / Minuman', icon: RestaurantIcon, sublist: [] },
-    { name: 'Berbelanja', icon: ShoppingCartIcon, sublist: [] },
-    {
-      name: 'Transportasi',
-      icon: DirectionsCarIcon,
-      sublist: [
-        { name: 'Mobil' },
-        { name: 'Motor' },
-        { name: 'Bahan bakar' },
-        { name: 'Asuransi' }
-      ]
-    },
-    { name: 'Hiburan', icon: SportsEsportsIcon, sublist: [] },
-    {
-      name: 'Rumah',
-      icon: HomeIcon,
-      sublist: [
-        { name: 'Tagihan listrik' },
-        { name: 'Tagihan air' }
-      ]
-    },
-    {
-      name: 'Keluarga',
-      icon: FamilyRestroomIcon,
-      sublist: [
-        { name: 'Anak' },
-        { name: 'Istri' }
-      ]
-    },
-    { name: 'Kesehatan / Olahraga', icon: FitnessCenterIcon, sublist: [] },
-    { name: 'Hewan Peliharaan', icon: PetsIcon, sublist: [] },
-    {
-      name: 'Liburan',
-      icon: BeachAccessIcon,
-      sublist: [
-        { name: 'Akomodasi' },
-        { name: 'Transportasi' }
-      ]
-    },
-    {
-      name: 'Lain (Pengeluaran)',
-      icon: MoreHorizIcon,
-      sublist: [
-        { name: 'Pajak' }
-      ]
-    }
-  ];
+  const fetchScheduledTransactions = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        start_date: filters.start_date || undefined,
+        end_date: filters.end_date || undefined,
+        type: filters.type || undefined,
+        category_name: filters.category || undefined,
+        period: filters.period || undefined
+      };
 
-  // Filter categories based on search query
-  const filteredCategories = categoryData.filter(category =>
-    category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    category.sublist.some(sub => sub.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+      // Bersihkan parameter undefined
+      Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
 
-  // Function to toggle expanded category
-  const toggleExpandCategory = (categoryName) => {
-    if (expandedCategory === categoryName) {
-      setExpandedCategory(null);
-    } else {
-      setExpandedCategory(categoryName);
+      const response = await axios.get("http://localhost:5000/scheduled", {
+        params,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      setScheduledTransactions(response.data);
+      setError(null);
+    } catch (err) {
+      setError(err.response?.data?.msg || "Gagal memuat transaksi terjadwal");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Function to select a category
-  const selectCategory = (category, subcategory = null) => {
-    if (subcategory) {
-      setSelectedCategory(subcategory.name);
-    } else {
-      setSelectedCategory(category.name);
+  const fetchCategories = async (type = null) => {
+    setLoadingCategories(true);
+    setCategoryError(null);
+    try {
+      const params = {};
+      if (type) params.type = type;
+      
+      const response = await axios.get("http://localhost:5000/category", {
+        params,
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setCategories(response.data);
+    } catch (err) {
+      setCategoryError(err.response?.data?.msg || "Gagal memuat kategori");
+    } finally {
+      setLoadingCategories(false);
     }
-    setShowCategoryModal(false);
   };
 
-  // Function to select a category for the transaction form
-  const selectTransactionCategory = (category, subcategory = null) => {
-    if (subcategory) {
-      setSelectedTransactionCategory(`${category.name} - ${subcategory.name}`);
-    } else {
-      setSelectedTransactionCategory(category.name);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+
+    if (name === 'type' && value) {
+      fetchCategories(value);
+      setFormData(prev => ({
+        ...prev,
+        category_name: ""
+      }));
     }
-    setShowCategoryModal(false);
-    setExpandedCategory(null);
   };
 
-  // Function to close category modal
-  const closeCategoryModal = () => {
-    setShowCategoryModal(false);
-    setExpandedCategory(null);
-    setSearchQuery('');
-  };
+  const handleSubmit = async (e, isIncome) => {
+    e.preventDefault();
+    try {
+      const transactionData = {
+        ...formData,
+        type: isIncome ? 'income' : 'expense'
+      };
 
-  // Function to handle outside clicks
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (showIncomeForm && incomeFormRef.current && !incomeFormRef.current.contains(event.target)) {
+      await axios.post("http://localhost:5000/scheduled", transactionData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      fetchScheduledTransactions();
+      if (isIncome) {
         setShowIncomeForm(false);
-      }
-      if (showExpenseForm && expenseFormRef.current && !expenseFormRef.current.contains(event.target)) {
+      } else {
         setShowExpenseForm(false);
       }
-      if (showSortingPanel && sortingPanelRef.current && !sortingPanelRef.current.contains(event.target)) {
-        setShowSortingPanel(false);
-      }
-      if (showCategoryModal && categoryModalRef.current && !categoryModalRef.current.contains(event.target)) {
-        closeCategoryModal();
-      }
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setActiveTransactionId(null);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-
-    // Add body scroll lock when forms are open
-    if (showIncomeForm || showExpenseForm || showCategoryModal) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
+      setFormData({
+        amount: "",
+        type: "expense",
+        period: "monthly",
+        start_date: "",
+        end_date: "",
+        description: "",
+        category_name: ""
+      });
+    } catch (err) {
+      setError(err.response?.data?.msg || "Gagal membuat transaksi terjadwal");
     }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'auto';
-    };
-  }, [showIncomeForm, showExpenseForm, showSortingPanel, showCategoryModal]);
-
-  // Function to get current date in DD/MM/YYYY format
-  const getCurrentDate = () => {
-    const today = new Date();
-    const day = String(today.getDate()).padStart(2, '0');
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const year = today.getFullYear();
-
-    return `${day}/${month}/${year}`;
   };
 
-  // Function to get current time in HH:MM format
-  const getCurrentTime = () => {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-
-    return `${hours}:${minutes}`;
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/scheduled/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      fetchScheduledTransactions();
+      setShowDeleteModal(false);
+    } catch (err) {
+      setError(err.response?.data?.msg || "Gagal menghapus transaksi terjadwal");
+    }
   };
 
-  // Reusable TransactionForm component to reduce code duplication
-  const TransactionForm = ({
-    title,
-    color,
-    formRef,
-    onClose,
-    fromToLabel,
-    isIncome
-  }) => {
-    const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
-
-    return (
-      <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
-        <div
-          ref={formRef}
-          className="bg-white w-full max-w-md rounded-lg shadow-xl p-5 max-h-[90vh] overflow-y-auto relative"
-        >
-          <div className="flex justify-between items-center mb-4 sticky top-0 bg-white pt-1 pb-3 border-b">
-            <h2 className="text-lg font-semibold">{title}</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 transition-colors"
-            >
-              <CloseIcon fontSize="small" />
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {/* Kategori */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Kategori</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-                  placeholder="Pilih Kategori"
-                  value={selectedTransactionCategory}
-                  readOnly
-                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-                />
-                <KeyboardArrowDownIcon
-                  className="absolute right-3 top-3 text-gray-400"
-                />
-                {showCategoryDropdown && (
-                  <div className="absolute z-10 bg-white border rounded-lg shadow-lg mt-2 w-full max-h-60 overflow-y-auto">
-                    {categoryData.map((category, index) => (
-                      <div key={index} className="border-b">
-                        <div
-                          className="flex items-center p-3 cursor-pointer hover:bg-gray-100"
-                          onClick={() => {
-                            if (category.sublist.length > 0) {
-                              toggleExpandCategory(category.name);
-                            } else {
-                              selectTransactionCategory(category);
-                              setShowCategoryDropdown(false);
-                            }
-                          }}
-                        >
-                          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                            {React.createElement(category.icon, { className: "text-green-500" })}
-                          </div>
-                          <div className="flex-grow">{category.name}</div>
-                          {category.sublist.length > 0 && (
-                            <ExpandMoreIcon
-                              className={`transform ${expandedCategory === category.name ? 'rotate-180' : ''}`}
-                            />
-                          )}
-                        </div>
-                        {expandedCategory === category.name && category.sublist.length > 0 && (
-                          <div className="pl-8 bg-gray-50">
-                            {category.sublist.map((subcategory, subIdx) => (
-                              <div
-                                key={subIdx}
-                                className="py-2 px-4 cursor-pointer hover:bg-gray-100"
-                                onClick={() => {
-                                  selectTransactionCategory(category, subcategory);
-                                  setShowCategoryDropdown(false);
-                                }}
-                              >
-                                {subcategory.name}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-  
-            {/* Nilai */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Nilai</label>
-              <div className="flex items-center relative">
-                <input
-                  type="text"
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-                  inputMode="numeric"
-                />
-                <span className="absolute right-3 text-gray-600">Rp</span>
-              </div>
-            </div>
-  
-            {/* Conditional: Return funds checkbox for income only */}
-            {isIncome && (
-              <div className="flex items-center pl-1">
-                <input type="checkbox" id="pengembalianDana" className="w-4 h-4 mr-2" />
-                <label
-                  htmlFor="pengembalianDana"
-                  className="text-sm text-gray-700"
-                >
-                  Apakah pengembalian dana?
-                </label>
-              </div>
-            )}
-  
-            {/* Total */}
-            <div className="flex justify-between py-2 border-t border-b">
-              <span className="text-sm font-medium">Total:</span>
-              <span className="font-semibold">Rp 0</span>
-            </div>
-  
-            {/* Rekening */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Rekening</label>
-              <div className="relative">
-                <select className="w-full p-3 border rounded-lg appearance-none bg-white focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none">
-                  <option>Dompet</option>
-                  <option>Rekening Bank</option>
-                </select>
-                <KeyboardArrowDownIcon
-                  className="absolute right-3 top-3 text-gray-400 pointer-events-none"
-                />
-              </div>
-            </div>
-  
-            {/* Checkbox for "Dicintang" */}
-            <div className="flex items-center pl-1">
-              <input
-                type="checkbox"
-                id={`dicintang${isIncome ? 'Income' : 'Expense'}`}
-                className="w-4 h-4 mr-2"
-              />
-              <label
-                htmlFor={`dicintang${isIncome ? 'Income' : 'Expense'}`}
-                className="text-sm text-gray-700"
-              >
-                Dicintang
-              </label>
-            </div>
-  
-            {/* Tanggal */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Tanggal</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-                  defaultValue={getCurrentDate()}
-                />
-                <CalendarTodayIcon
-                  className="absolute right-3 top-3 text-gray-400"
-                />
-              </div>
-            </div>
-  
-            {/* Waktu */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Waktu</label>
-              <input
-                type="text"
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-                defaultValue={getCurrentTime()}
-              />
-            </div>
-  
-            {/* From/To (Conditional label) */}
-            <div>
-              <label className="block text-sm font-medium mb-1">{fromToLabel} (Opsional)</label>
-              <input
-                type="text"
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-              />
-            </div>
-  
-            {/* Catatan (Opsional) */}
-            <div>
-              <label className="block text-sm font-medium mb-1">Catatan (Opsional)</label>
-              <textarea
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none h-24 resize-none"
-              />
-            </div>
-  
-            {/* Buttons */}
-            <div className="flex justify-end space-x-3 mt-6 sticky bottom-0 pb-1 pt-3 bg-white border-t">
-              <button
-                onClick={onClose}
-                className={`px-5 py-2.5 border border-${color}-500 rounded-lg text-${color}-500 font-medium hover:bg-${color}-50 transition-colors`}
-                style={{ color: isIncome ? '#10B981' : '#EF4444', borderColor: isIncome ? '#10B981' : '#EF4444' }}
-              >
-                Batal
-              </button>
-              <button
-                onClick={onClose}
-                className={`px-5 py-2.5 bg-${color}-500 text-white rounded-lg font-medium hover:bg-${color}-600 transition-colors`}
-                style={{ backgroundColor: isIncome ? '#10B981' : '#EF4444' }}
-              >
-                Simpan
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const handleToggleOptions = (id) => {
-    setActiveTransactionId((prev) => (prev === id ? null : id));
-  };
-
-  const handleEditTransaction = (transaction) => {
-    setEditingTransaction(transaction); // Setel transaksi yang sedang diedit
-  };
-
-  const handleDeleteTransaction = (transaction) => {
-    setDeletingTransaction(transaction);
-    setShowDeleteModal(true);
-  };
-
-  const handleCloseDeleteModal = () => {
-    setShowDeleteModal(false);
-    setDeletingTransaction(null);
-  };
-
-  const handleConfirmDelete = () => {
-    if (deletingTransaction) {
-      const updatedTransactions = scheduledTransactions.filter(
-        (t) => t.id !== deletingTransaction.id
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.patch(
+        `http://localhost:5000/scheduled/${editingTransaction.uuid}`,
+        {
+          amount: editingTransaction.amount,
+          type: editingTransaction.type,
+          period: editingTransaction.period,
+          start_date: editingTransaction.start_date,
+          end_date: editingTransaction.end_date,
+          description: editingTransaction.description,
+          category_name: editingTransaction.category
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
       );
-      setScheduledTransactions(updatedTransactions);
+      fetchScheduledTransactions();
+      setEditingTransaction(null);
+    } catch (err) {
+      setError(err.response?.data?.msg || "Gagal mengupdate transaksi terjadwal");
     }
-    setShowDeleteModal(false);
-    setDeletingTransaction(null);
+  };
+
+  const applyFilters = () => {
+    fetchScheduledTransactions();
+  };
+
+  const resetFilters = () => {
+    setFilters({
+      start_date: '',
+      end_date: '',
+      type: '',
+      category: ''
+    });
+    fetchScheduledTransactions();
+  };
+
+  const handleEditClick = (transaction) => {
+    setEditingTransaction(transaction);
+    fetchCategories(transaction.type);
+  };
+
+  useEffect(() => {
+    dispatch(getMe());
+    fetchScheduledTransactions();
+    fetchCategories();
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isError) {
+      navigate("/login");
+    }
+  }, [isError, navigate]);
+
+  useEffect(() => {
+    fetchCategories(filters.type || undefined);
+  }, [filters.type]);
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   return (
     <div className="flex bg-gray-100 min-h-screen p-4 gap-4">
-      {/* Left Panel - Transaction History */}
+      {/* Panel Kiri - Riwayat Transaksi Terjadwal */}
       <div className="w-2/3 bg-white p-4 shadow-md rounded-lg">
         <h1 className="text-lg font-medium mb-4">Transaksi Terjadwal</h1>
+        
+        {/* Tampilkan filter aktif */}
+        {(filters.type || filters.category) && (
+          <div className="mb-4 p-2 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-800">
+              Filter aktif: 
+              {filters.type && ` Tipe: ${filters.type === 'income' ? 'Pemasukan' : 'Pengeluaran'}`}
+              {filters.category && ` Kategori: ${filters.category}`}
+            </p>
+          </div>
+        )}
 
-        <div className="space-y-1">
-          {scheduledTransactions.map((transaction) => (
-            <div key={transaction.id} className="flex items-center p-3 hover:bg-gray-50 border-b cursor-pointer transition-colors relative">
-              {/* Main content */}
-              <div className="flex-1">
-                <div className="font-medium">{transaction.category}</div>
-                <div className="text-gray-500 text-sm">{transaction.subcategory}</div>
-              </div>
-
-              {/* Date */}
-              <div className="text-sm text-gray-600 mr-4">{transaction.date}</div>
-
-              {/* Amount */}
-              <div className={`text-right mr-2 font-medium ${transaction.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
-                {transaction.type === 'income' ? '+' : '-'} Rp {transaction.amount.toLocaleString()}
-              </div>
-
-              {/* More Options Button */}
-              <button
-                className="p-1 hover:bg-gray-100 rounded-full"
-                onClick={() => handleToggleOptions(transaction.id)}
+        {loading ? (
+          <div className="text-center py-8">Memuat data...</div>
+        ) : error ? (
+          <div className="text-red-500 text-center py-4">{error}</div>
+        ) : scheduledTransactions.length === 0 ? (
+          <div className="text-center py-8">Tidak ada transaksi terjadwal yang ditemukan</div>
+        ) : (
+          <div className="space-y-1">
+            {scheduledTransactions.map((transaction) => (
+              <div
+                key={transaction.uuid}
+                className="flex items-center p-3 hover:bg-gray-50 border-b cursor-pointer transition-colors relative"
               >
-                <MoreVertIcon fontSize="small" />
-              </button>
-
-              {/* Options Dropdown */}
-              {activeTransactionId === transaction.id && (
-                <div
-                  ref={dropdownRef}
-                  className="absolute right-0 top-10 bg-white shadow-md rounded-lg p-2 z-10"
-                >
-                  <button
-                    className="flex items-center w-full px-3 py-2 hover:bg-gray-100 rounded-md"
-                    onClick={() => handleEditTransaction(transaction)}
-                  >
-                    <EditIcon fontSize="small" className="mr-2" />
-                    Edit
-                  </button>
-                  <button
-                    className="flex items-center w-full px-3 py-2 hover:bg-gray-100 rounded-md"
-                    onClick={() => handleDeleteTransaction(transaction)}
-                  >
-                    <DeleteIcon fontSize="small" className="mr-2" />
-                    Hapus
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Pagination */}
-        <div className="flex justify-center items-center mt-4 gap-2">
-          <span className="text-sm text-gray-600">1-10 dari 20 item</span>
-          <div className="flex">
-            <button className="w-8 h-8 bg-green-500 text-white rounded-md flex items-center justify-center">
-              1
-            </button>
-            <button className="w-8 h-8 bg-white border text-gray-600 rounded-md flex items-center justify-center ml-1 hover:bg-gray-50">
-              2
-            </button>
-            <button className="w-8 h-8 flex items-center justify-center ml-1 hover:bg-gray-50 rounded-md">
-              <KeyboardArrowRightIcon fontSize="small" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Panel - Filter */}
-      <div className="w-1/3 bg-white p-4 shadow-md rounded-lg">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-medium">Sorting</h2>
-        </div>
-
-        {/* Tanggal */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Tanggal</label>
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="DD/MM/YYYY"
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-            />
-            <CalendarTodayIcon
-              fontSize="small"
-              className="absolute right-3 top-3 text-gray-400"
-            />
-          </div>
-        </div>
-
-        {/* Kategori */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Kategori</label>
-          <div className="relative">
-            <div
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none cursor-pointer flex justify-between items-center"
-              onClick={() => setShowCategoryModal(true)}
-            >
-              <span>{selectedCategory}</span>
-              <KeyboardArrowDownIcon className="text-gray-400" />
-            </div>
-          </div>
-        </div>
-
-        {/* Catatan */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Catatan</label>
-          <input
-            type="text"
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-            placeholder="Cari dalam catatan"
-          />
-        </div>
-
-        {/* Tipe */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Tipe</label>
-          <div className="flex flex-col gap-2 ml-1">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="pengeluaran"
-                className="w-4 h-4 mr-2"
-              />
-              <label htmlFor="pengeluaran" className="text-sm">Pengeluaran</label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="pemasukan"
-                className="w-4 h-4 mr-2"
-              />
-              <label htmlFor="pemasukan" className="text-sm">Pemasukan</label>
-            </div>
-          </div>
-        </div>
-
-        {/* Apply Filters Button */}
-        <button className="w-full mt-4 p-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors">
-          Terapkan Filter
-        </button>
-      </div>
-
-      {/* Floating Action Buttons */}
-      <div className="fixed bottom-4 right-4 flex flex-col gap-2">
-        <button
-          className="w-12 h-12 bg-green-500 text-white rounded-full shadow-lg flex items-center justify-center"
-          onClick={() => setShowIncomeForm(true)}
-        >
-          <AddIcon />
-        </button>
-        <button
-          className="w-12 h-12 bg-red-500 text-white rounded-full shadow-lg flex items-center justify-center"
-          onClick={() => setShowExpenseForm(true)}
-        >
-          <RemoveIcon />
-        </button>
-      </div>
-
-      {/* Render Forms based on state */}
-      {showIncomeForm && (
-        <TransactionForm
-          title="Pemasukan Baru"
-          color="green-500"
-          formRef={incomeFormRef}
-          onClose={() => setShowIncomeForm(false)}
-          fromToLabel="Dari"
-          isIncome={true}
-        />
-      )}
-
-      {showExpenseForm && (
-        <TransactionForm
-          title="Pengeluaran Baru"
-          color="red-500"
-          formRef={expenseFormRef}
-          onClose={() => setShowExpenseForm(false)}
-          fromToLabel="Kepada"
-          isIncome={false}
-        />
-      )}
-
-      {/* Sorting Panel (Mobile) */}
-      {showSortingPanel && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden">
-          <div
-            ref={sortingPanelRef}
-            className="fixed right-0 top-0 h-full w-3/4 bg-white shadow-lg p-4 overflow-y-auto"
-          >
-            <div className="flex justify-between items-center mb-4 border-b pb-3">
-              <h2 className="text-lg font-medium">Sorting</h2>
-              <button
-                onClick={() => setShowSortingPanel(false)}
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                <CloseIcon fontSize="small" />
-              </button>
-            </div>
-
-            {/* Tanggal */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Tanggal</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="DD/MM/YYYY"
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-                />
-                <CalendarTodayIcon
-                  fontSize="small"
-                  className="absolute right-3 top-3 text-gray-400"
-                />
-              </div>
-            </div>
-
-            {/* Kategori */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Kategori</label>
-              <div className="relative">
-                <div
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none cursor-pointer flex justify-between items-center"
-                  onClick={() => setShowCategoryModal(true)}
-                >
-                  <span>{selectedCategory}</span>
-                  <KeyboardArrowDownIcon className="text-gray-400" />
-                </div>
-              </div>
-            </div>
-
-            {/* Catatan */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Catatan</label>
-              <input
-                type="text"
-                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-offset-2 focus:ring-opacity-50 focus:outline-none"
-                placeholder="Cari dalam catatan"
-              />
-            </div>
-
-            {/* Tipe */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Tipe</label>
-              <div className="flex flex-col gap-2 ml-1">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="pengeluaranMobile"
-                    className="w-4 h-4 mr-2"
-                  />
-                  <label htmlFor="pengeluaranMobile" className="text-sm">Pengeluaran</label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="pemasukanMobile"
-                    className="w-4 h-4 mr-2"
-                  />
-                  <label htmlFor="pemasukanMobile" className="text-sm">Pemasukan</label>
-                </div>
-              </div>
-            </div>
-
-            {/* Apply Button */}
-            <button className="w-full mt-4 p-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors">
-              Terapkan Filter
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Category Selection Modal */}
-      {showCategoryModal && (
-        <div className="fixed inset-0 flex justify-center items-center z-50  bg-opacity-50">
-          <div
-            ref={categoryModalRef}
-            className="w-full max-w-md rounded shadow-lg z-10 bg-white max-h-[90vh] overflow-hidden flex flex-col"
-          >
-            <div className="text-center font-semibold text-xl p-4 border-b">
-              PILIH KATEGORI
-            </div>
-
-            {/* Search Bar */}
-            <div className="p-4 border-b flex">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full p-2 border rounded-l focus:outline-none"
-                placeholder="Cari..."
-              />
-              <button className="bg-green-500 text-white px-3 rounded-r">
-                <SearchIcon />
-              </button>
-            </div>
-
-            {/* Categories List */}
-            <div className="overflow-y-auto flex-grow">
-              {filteredCategories.map((category, index) => (
-                <div key={index} className="border-b">
-                  <div
-                    className="flex items-center p-3 cursor-pointer hover:bg-gray-100"
-                    onClick={() => category.sublist.length > 0
-                      ? toggleExpandCategory(category.name)
-                      : selectCategory(category)}
-                  >
-                    <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                      {React.createElement(category.icon, { className: "text-green-500" })}
-                    </div>
-                    <div className="flex-grow">{category.name}</div>
-                    {category.sublist.length > 0 && (
-                      <ExpandMoreIcon className={`transform ${expandedCategory === category.name ? 'rotate-180' : ''}`} />
-                    )}
+                <div className="flex-1">
+                  <div className="font-medium">
+                    {transaction.category || "Tanpa Kategori"}
+                    <span className="ml-2 text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
+                      {transaction.period}
+                    </span>
                   </div>
+                  <div className="text-gray-500 text-sm">
+                    {transaction.description}
+                  </div>
+                  <div className="text-gray-500 text-xs mt-1">
+                    Mulai: {formatDate(transaction.start_date)} | 
+                    {transaction.end_date && ` Selesai: ${formatDate(transaction.end_date)}`}
+                  </div>
+                </div>
 
-                  {/* Sublist items if expanded */}
-                  {expandedCategory === category.name && category.sublist.length > 0 && (
-                    <div className="pl-16 bg-gray-50">
-                      {category.sublist.map((subcategory, subIdx) => (
-                        <div
-                          key={subIdx}
-                          className="py-2 px-4 cursor-pointer hover:bg-gray-100"
-                          onClick={() => selectCategory(category, subcategory)}
-                        >
-                          {subcategory.name}
-                        </div>
-                      ))}
-                    </div>
+                <div className="text-right mr-2 font-medium">
+                  {transaction.type === "income" ? (
+                    <span className="text-green-600">
+                      + {formatCurrency(transaction.amount)}
+                    </span>
+                  ) : (
+                    <span className="text-red-600">
+                      - {formatCurrency(transaction.amount)}
+                    </span>
                   )}
                 </div>
-              ))}
-            </div>
 
-            {/* Modal Footer */}
-            <div className="p-4 flex justify-end border-t">
-              <button
-                onClick={closeCategoryModal}
-                className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-              >
-                Close
-              </button>
-            </div>
+                <button
+                  className="p-1 hover:bg-gray-100 rounded-full"
+                  onClick={() => 
+                    setActiveTransactionId(prev => 
+                      prev === transaction.uuid ? null : transaction.uuid
+                    )
+                  }
+                >
+                  <MoreVert fontSize="small" />
+                </button>
+
+                {activeTransactionId === transaction.uuid && (
+                  <div
+                    ref={dropdownRef}
+                    className="absolute right-0 top-10 bg-white shadow-md rounded-lg p-2 z-10"
+                  >
+                    <button
+                      className="flex items-center w-full px-3 py-2 hover:bg-gray-100 rounded-md"
+                      onClick={() => handleEditClick(transaction)}
+                    >
+                      <Edit fontSize="small" className="mr-2" />
+                      Edit
+                    </button>
+                    <button
+                      className="flex items-center w-full px-3 py-2 hover:bg-gray-100 rounded-md"
+                      onClick={() => {
+                        setDeletingTransaction(transaction);
+                        setShowDeleteModal(true);
+                      }}
+                    >
+                      <Delete fontSize="small" className="mr-2" />
+                      Hapus
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Panel Kanan - Filter */}
+      <div className="w-1/3 bg-white p-4 shadow-md rounded-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-medium">Filter</h2>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Tanggal Mulai</label>
+          <div className="relative">
+            <input
+              type="date"
+              value={filters.start_date}
+              onChange={(e) => setFilters({...filters, start_date: e.target.value})}
+              className="w-full p-2 border rounded appearance-none"
+            />
+            <CalendarToday
+              fontSize="small"
+              className="absolute right-3 top-2.5 text-gray-400 pointer-events-none"
+            />
           </div>
         </div>
-      )}
 
-      {editingTransaction && (
-        <div className="fixed inset-0 flex justify-center items-center z-50 backdrop-clear-sm">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">Edit Transaksi</h2>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Tanggal Akhir</label>
+          <div className="relative">
+            <input
+              type="date"
+              value={filters.end_date}
+              onChange={(e) => setFilters({...filters, end_date: e.target.value})}
+              className="w-full p-2 border rounded appearance-none"
+            />
+            <CalendarToday
+              fontSize="small"
+              className="absolute right-3 top-2.5 text-gray-400 pointer-events-none"
+            />
+          </div>
+        </div>
 
-                // Validasi input
-                if (
-                  !editingTransaction.category ||
-                  !editingTransaction.subcategory ||
-                  !editingTransaction.amount ||
-                  !editingTransaction.date
-                ) {
-                  alert("Semua field harus diisi!");
-                  return;
-                }
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Tipe</label>
+          <div className="flex gap-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="filterType"
+                value="expense"
+                checked={filters.type === 'expense'}
+                onChange={() => setFilters({...filters, type: 'expense'})}
+                className="mr-2"
+              />
+              Pengeluaran
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="filterType"
+                value="income"
+                checked={filters.type === 'income'}
+                onChange={() => setFilters({...filters, type: 'income'})}
+                className="mr-2"
+              />
+              Pemasukan
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="filterType"
+                value=""
+                checked={!filters.type}
+                onChange={() => setFilters({...filters, type: ''})}
+                className="mr-2"
+              />
+              Semua
+            </label>
+          </div>
+        </div>
 
-                // Simpan perubahan transaksi
-                const updatedTransactions = scheduledTransactions.map((t) =>
-                  t.id === editingTransaction.id ? editingTransaction : t
-                );
+        <div className="mb-2">
+          <label className="block font-medium mb-1">Periode</label>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-1">
+              <input
+                type="radio"
+                name="period"
+                value="daily"
+                checked={filters.period === "daily"}
+                onChange={(e) => setFilters({ ...filters, period: e.target.value })}
+              />
+              Harian
+            </label>
+            <label className="flex items-center gap-1">
+              <input
+                type="radio"
+                name="period"
+                value="weekly"
+                checked={filters.period === "weekly"}
+                onChange={(e) => setFilters({ ...filters, period: e.target.value })}
+              />
+              Mingguan
+            </label>
+            <label className="flex items-center gap-1">
+              <input
+                type="radio"
+                name="period"
+                value="monthly"
+                checked={filters.period === "monthly"}
+                onChange={(e) => setFilters({ ...filters, period: e.target.value })}
+              />
+              Bulanan
+            </label>
+            <label className="flex items-center gap-1">
+              <input
+                type="radio"
+                name="period"
+                value="all"
+                checked={filters.period === "all"}
+                onChange={(e) => setFilters({ ...filters, period: e.target.value })}
+              />
+              Semua
+            </label>
+          </div>
+        </div>
 
-                setScheduledTransactions(updatedTransactions);
-                setEditingTransaction(null); // Tutup form
-              }}
-            >
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Kategori</label>
-                <input
-                  type="text"
-                  value={editingTransaction.category || ""}
-                  onChange={(e) =>
-                    setEditingTransaction({ ...editingTransaction, category: e.target.value })
-                  }
-                  className="w-full p-2 border rounded"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Subkategori</label>
-                <input
-                  type="text"
-                  value={editingTransaction.subcategory || ""}
-                  onChange={(e) =>
-                    setEditingTransaction({ ...editingTransaction, subcategory: e.target.value })
-                  }
-                  className="w-full p-2 border rounded"
-                />
-              </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Kategori</label>
+          <select
+            value={filters.category}
+            onChange={(e) => setFilters({...filters, category: e.target.value})}
+            className="w-full p-2 border rounded"
+            disabled={loadingCategories}
+          >
+            <option value="">Semua Kategori</option>
+            {loadingCategories ? (
+              <option value="" disabled>Memuat kategori...</option>
+            ) : (
+              categories.map((category) => (
+                <option key={category.uuid} value={category.name}>
+                  {category.name}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
+
+        <button 
+          className="w-full mt-4 p-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors"
+          onClick={applyFilters}
+        >
+          Terapkan Filter
+        </button>
+
+        <button 
+          className="w-full mt-2 p-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
+          onClick={resetFilters}
+        >
+          Reset Filter
+        </button>
+      </div>
+
+      {/* Tombol Aksi */}
+      <div className="fixed bottom-6 right-6 flex flex-col gap-3">
+        <button
+          className="w-14 h-14 bg-green-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-green-600 transition-colors"
+          onClick={() => {
+            setFormData({
+              amount: "",
+              type: "income",
+              period: "monthly",
+              start_date: "",
+              end_date: "",
+              description: "",
+              category_name: ""
+            });
+            fetchCategories("income");
+            setShowIncomeForm(true);
+          }}
+        >
+          <Add fontSize="medium" />
+        </button>
+        <button
+          className="w-14 h-14 bg-red-500 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-red-600 transition-colors"
+          onClick={() => {
+            setFormData({
+              amount: "",
+              type: "expense",
+              period: "monthly",
+              start_date: "",
+              end_date: "",
+              description: "",
+              category_name: ""
+            });
+            fetchCategories("expense");
+            setShowExpenseForm(true);
+          }}
+        >
+          <Remove fontSize="medium" />
+        </button>
+      </div>
+
+      {/* Form Pemasukan Terjadwal */}
+      {showIncomeForm && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div 
+            ref={incomeFormRef}
+            className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Tambah Pemasukan Terjadwal</h2>
+              <button onClick={() => setShowIncomeForm(false)}>
+                <Close fontSize="small" />
+              </button>
+            </div>
+            
+            <form onSubmit={(e) => handleSubmit(e, true)}>
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Jumlah</label>
                 <input
                   type="number"
-                  value={editingTransaction.amount || ""}
-                  onChange={(e) =>
-                    setEditingTransaction({
-                      ...editingTransaction,
-                      amount: parseInt(e.target.value) || 0,
-                    })
-                  }
+                  name="amount"
+                  value={formData.amount}
+                  onChange={handleInputChange}
                   className="w-full p-2 border rounded"
+                  required
                 />
               </div>
+              
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Tanggal</label>
+                <label className="block text-sm font-medium mb-1">Kategori</label>
+                {loadingCategories ? (
+                  <div className="p-2 text-center">Memuat kategori...</div>
+                ) : categoryError ? (
+                  <div className="text-red-500 text-sm">{categoryError}</div>
+                ) : (
+                  <select
+                    name="category_name"
+                    value={formData.category_name}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
+                    required
+                  >
+                    <option value="">Pilih Kategori</option>
+                    {categories.map((category) => (
+                      <option key={category.uuid} value={category.name}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Periode</label>
+                <select
+                  name="period"
+                  value={formData.period}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  required
+                >
+                  <option value="monthly">Bulanan</option>
+                  <option value="weekly">Mingguan</option>
+                  <option value="daily">Harian</option>
+                </select>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Tanggal Mulai</label>
                 <input
                   type="date"
-                  value={editingTransaction.date || ""}
-                  onChange={(e) =>
-                    setEditingTransaction({ ...editingTransaction, date: e.target.value })
-                  }
+                  name="start_date"
+                  value={formData.start_date}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Tanggal Berakhir (Opsional)</label>
+                <input
+                  type="date"
+                  name="end_date"
+                  value={formData.end_date}
+                  onChange={handleInputChange}
                   className="w-full p-2 border rounded"
                 />
               </div>
-              <div className="flex justify-end space-x-2">
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Deskripsi (Opsional)</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded h-24"
+                />
+              </div>
+              
+              <div className="flex justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setEditingTransaction(null)}
-                  className="px-4 py-2 bg-gray-300 rounded"
+                  onClick={() => setShowIncomeForm(false)}
+                  className="px-4 py-2 border border-gray-300 rounded"
                 >
                   Batal
                 </button>
-                <button type="submit" className="px-4 py-2 bg-green-500 text-white rounded">
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-500 text-white rounded"
+                >
                   Simpan
                 </button>
               </div>
@@ -960,29 +659,295 @@ const HalamanTerjadwal = () => {
         </div>
       )}
 
-      {showDeleteModal && deletingTransaction && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 backdrop-clear-sm">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
-            <h2 className="text-xl font-bold text-center mb-6">
-              HAPUS TRANSAKSI "{deletingTransaction.category.toUpperCase()}"?
-            </h2>
-            <div className="mb-4">
-              <p className="mb-1">Subkategori: {deletingTransaction.subcategory}</p>
-              <p className="mb-1">Jumlah: Rp {deletingTransaction.amount.toLocaleString()}</p>
-              <p className="mb-1">Tanggal: {deletingTransaction.date}</p>
+      {/* Form Pengeluaran Terjadwal */}
+      {showExpenseForm && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div 
+            ref={expenseFormRef}
+            className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Tambah Pengeluaran Terjadwal</h2>
+              <button onClick={() => setShowExpenseForm(false)}>
+                <Close fontSize="small" />
+              </button>
             </div>
-            <div className="flex justify-between mt-8">
+            
+            <form onSubmit={(e) => handleSubmit(e, false)}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Jumlah</label>
+                <input
+                  type="number"
+                  name="amount"
+                  value={formData.amount}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Kategori</label>
+                {loadingCategories ? (
+                  <div className="p-2 text-center">Memuat kategori...</div>
+                ) : categoryError ? (
+                  <div className="text-red-500 text-sm">{categoryError}</div>
+                ) : (
+                  <select
+                    name="category_name"
+                    value={formData.category_name}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded"
+                    required
+                  >
+                    <option value="">Pilih Kategori</option>
+                    {categories.map((category) => (
+                      <option key={category.uuid} value={category.name}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Periode</label>
+                <select
+                  name="period"
+                  value={formData.period}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  required
+                >
+                  <option value="monthly">Bulanan</option>
+                  <option value="weekly">Mingguan</option>
+                  <option value="daily">Harian</option>
+                </select>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Tanggal Mulai</label>
+                <input
+                  type="date"
+                  name="start_date"
+                  value={formData.start_date}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Tanggal Berakhir (Opsional)</label>
+                <input
+                  type="date"
+                  name="end_date"
+                  value={formData.end_date}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Deskripsi (Opsional)</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  className="w-full p-2 border rounded h-24"
+                />
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowExpenseForm(false)}
+                  className="px-4 py-2 border border-gray-300 rounded"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-red-500 text-white rounded"
+                >
+                  Simpan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Edit */}
+      {editingTransaction && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Edit Transaksi Terjadwal</h2>
+              <button onClick={() => setEditingTransaction(null)}>
+                <Close fontSize="small" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleUpdate}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Tipe</label>
+                <select
+                  name="type"
+                  value={editingTransaction.type}
+                  onChange={(e) => setEditingTransaction({
+                    ...editingTransaction,
+                    type: e.target.value
+                  })}
+                  className="w-full p-2 border rounded"
+                  required
+                >
+                  <option value="income">Pemasukan</option>
+                  <option value="expense">Pengeluaran</option>
+                </select>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Jumlah</label>
+                <input
+                  type="number"
+                  name="amount"
+                  value={editingTransaction.amount}
+                  onChange={(e) => setEditingTransaction({
+                    ...editingTransaction,
+                    amount: e.target.value
+                  })}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Kategori</label>
+                {loadingCategories ? (
+                  <div className="p-2 text-center">Memuat kategori...</div>
+                ) : categoryError ? (
+                  <div className="text-red-500 text-sm">{categoryError}</div>
+                ) : (
+                  <select
+                    name="category_name"
+                    value={editingTransaction.category}
+                    onChange={(e) => setEditingTransaction({
+                      ...editingTransaction,
+                      category: e.target.value
+                    })}
+                    className="w-full p-2 border rounded"
+                    required
+                  >
+                    <option value="">Pilih Kategori</option>
+                    {categories.map((category) => (
+                      <option key={category.uuid} value={category.name}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Periode</label>
+                <select
+                  name="period"
+                  value={editingTransaction.period}
+                  onChange={(e) => setEditingTransaction({
+                    ...editingTransaction,
+                    period: e.target.value
+                  })}
+                  className="w-full p-2 border rounded"
+                  required
+                >
+                  <option value="monthly">Bulanan</option>
+                  <option value="weekly">Mingguan</option>
+                  <option value="daily">Harian</option>
+                </select>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Tanggal Mulai</label>
+                <input
+                  type="date"
+                  name="start_date"
+                  value={editingTransaction.start_date}
+                  onChange={(e) => setEditingTransaction({
+                    ...editingTransaction,
+                    start_date: e.target.value
+                  })}
+                  className="w-full p-2 border rounded"
+                  required
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Tanggal Berakhir (Opsional)</label>
+                <input
+                  type="date"
+                  name="end_date"
+                  value={editingTransaction.end_date}
+                  onChange={(e) => setEditingTransaction({
+                    ...editingTransaction,
+                    end_date: e.target.value
+                  })}
+                  className="w-full p-2 border rounded"
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Deskripsi (Opsional)</label>
+                <textarea
+                  name="description"
+                  value={editingTransaction.description}
+                  onChange={(e) => setEditingTransaction({
+                    ...editingTransaction,
+                    description: e.target.value
+                  })}
+                  className="w-full p-2 border rounded h-24"
+                />
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditingTransaction(null)}
+                  className="px-4 py-2 border border-gray-300 rounded"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-green-500 text-white rounded"
+                >
+                  Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Konfirmasi Hapus */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Hapus Transaksi Terjadwal?</h2>
+            <p className="mb-6">Anda yakin ingin menghapus transaksi terjadwal ini?</p>
+            
+            <div className="flex justify-end gap-2">
               <button
-                className="bg-gray-300 text-gray-700 font-medium px-6 py-2 rounded hover:bg-gray-400"
-                onClick={handleCloseDeleteModal}
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded"
               >
-                BATAL
+                Batal
               </button>
               <button
-                className="bg-red-500 text-white font-medium px-6 py-2 rounded hover:bg-red-600"
-                onClick={handleConfirmDelete}
+                onClick={() => handleDelete(deletingTransaction.uuid)}
+                className="px-4 py-2 bg-red-500 text-white rounded"
               >
-                HAPUS
+                Hapus
               </button>
             </div>
           </div>

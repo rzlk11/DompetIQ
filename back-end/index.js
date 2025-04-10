@@ -10,6 +10,9 @@ import TransactionRoute from "./routes/TransactionRoute.js";
 import AuthRoute from "./routes/AuthRoute.js";
 import CategoryRoute from "./routes/CategoryRoute.js";
 import ScheduledRoute from "./routes/ScheduledRoute.js";
+import OTPRoute from "./routes/OTPRoutes.js";
+import EmailVerificationRoute from "./routes/EmailVerificationRoute.js";
+import ForgotPasswordRoute from "./routes/ForgotPasswordRoute.js";
 dotenv.config();
 
 const app = express();
@@ -48,6 +51,9 @@ app.use(TransactionRoute);
 app.use(CategoryRoute);
 app.use(ScheduledRoute);
 app.use(AuthRoute);
+app.use(OTPRoute);
+app.use(EmailVerificationRoute);
+app.use(ForgotPasswordRoute);
 
 store.sync();
 

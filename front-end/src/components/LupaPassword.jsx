@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LockIcon from '@mui/icons-material/Lock';
@@ -6,11 +7,67 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 
 const LupaPassword = () => {
   const [email, setEmail] = useState('');
+  const [isSubmitEmailError, setIsSubmitEmailError] = useState(false);
+  const [submitEmailErrorMessage, setSubmitEmailErrorMessage] = useState('');
   const [step, setStep] = useState(1);
+  const [isOtpError, setOtpError] = useState(false);
+  const [otpErrorMessage, setOtpErrorMessage] = useState('');
   const [otp, setOtp] = useState(['', '', '', '']);
   const [newPassword, setNewPassword] = useState('');
+  const [isUpdatePasswordError, setUpdatePasswordError] = useState(false);
+  const [updatePasswordErrorMessage, setUpdatePasswordErrorMessage] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const sendPasswordOTP = async () => {
+    try {
+      await axios.post("http://localhost:5000/forgot-password", {
+        email,
+      });
+      setIsSubmitEmailError(false);
+      setSubmitEmailErrorMessage('');
+      return true;
+    } catch (error) {
+      console.error(error);
+      setIsSubmitEmailError(true);
+      setSubmitEmailErrorMessage(error.response.data.error);
+      return false;
+    }
+  };
+
+  const verifyOTP = async () => {
+    try {
+      await axios.post("http://localhost:5000/verify-otp", {
+        email: email,
+        otp: otp.join('')
+      });
+      setOtpError(false);
+      setOtpErrorMessage('');
+      return true;
+    } catch (error) {
+      console.error(error);
+      setOtpError(true);
+      setOtpErrorMessage(error.response.data.error);
+      return false;
+    }
+  };
+
+  const newPasswordUpdate = async ({ email }) => {
+    try {
+      await axios.post("http://localhost:5000/reset-password", {
+        email,
+        newPassword: newPassword
+      });
+      setUpdatePasswordError(false);
+      setUpdatePasswordErrorMessage('');
+      return true;
+    } catch (error) {
+      console.error(error);
+      setUpdatePasswordError(true);
+      setUpdatePasswordErrorMessage(error.response.data.error);
+      return false;
+    }
+  }
 
   // Handle email input change
   const handleEmailChange = (e) => {
@@ -30,39 +87,54 @@ const LupaPassword = () => {
   };
 
   // Handle OTP submission
-  const handleSubmitEmail = (e) => {
+  const handleSubmitEmail = async (e) => {
     e.preventDefault();
     setLoading(true);
     
+    const isValid = await sendPasswordOTP();
+    setLoading(false);
+    if(isValid) {
+      setStep(2)
+    }
     // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      setStep(2);
-    }, 1500);
+    // setTimeout(() => {
+    //   setLoading(false);
+    //   setStep(2);
+    // }, 1500);
   };
 
   // Handle OTP verification
-  const handleVerifyOtp = (e) => {
+  const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
+    const isValid = await verifyOTP();
+    setLoading(false);
+    if(isValid){
       setStep(3);
-    }, 1500);
+    }
+    // Simulate API call
+    // setTimeout(() => {
+    //   setLoading(false);
+    //   setStep(3);
+    // }, 1500);
   };
 
   // Handle password reset
-  const handleResetPassword = (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
+    const isValid = await newPasswordUpdate({ email });
+    setLoading(false);
+    if(isValid) {
       setStep(4);
-    }, 1500);
+    }
+    // Simulate API call
+    // setTimeout(() => {
+    //   setLoading(false);
+    //   setStep(4);
+    // }, 1500);
   };
 
   // Handle new password input change
@@ -98,6 +170,7 @@ const LupaPassword = () => {
                 <p className="text-gray-600">
                   Masukkan alamat email yang terdaftar untuk menerima kode verifikasi
                 </p>
+                {isSubmitEmailError && <p className="text-red-500 text-sm mt-1">{submitEmailErrorMessage}</p>}
               </div>
               
               <div className="mb-6">
@@ -130,6 +203,7 @@ const LupaPassword = () => {
             <form onSubmit={handleVerifyOtp}>
               <div className="mb-8 text-center">
                 <h2 className="text-xl font-semibold mb-2">Verifikasi Kode OTP</h2>
+                {isOtpError && <p className="text-red-500 text-sm mt-1">{otpErrorMessage}</p>}
                 <p className="text-gray-600">
                   Masukkan kode verifikasi yang telah dikirim ke email {email}
                 </p>
@@ -173,6 +247,7 @@ const LupaPassword = () => {
                   <LockIcon sx={{ fontSize: 48 }} className="text-green-500" />
                 </div>
                 <h2 className="text-xl font-semibold mb-2">Buat Password Baru</h2>
+                {isUpdatePasswordError && <p className="text-red-500 text-sm mt-1">{updatePasswordErrorMessage}</p>}
                 <p className="text-gray-600">
                   Password baru Anda harus berbeda dari password yang sebelumnya digunakan
                 </p>

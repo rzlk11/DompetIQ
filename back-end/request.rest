@@ -106,3 +106,61 @@ Content-Type: application/json
 
 ###
 GET http://localhost:5000/dashboard/monthly-comparison
+//otp request
+POST http://localhost:5000/request-otp
+Content-Type: application/json
+
+{
+    "email": "rizalharyo14@gmail.com",
+    "subject": "Email Verification",
+    "message": "Verify your email with the code below",
+    "duration": 1
+}
+
+###
+//email verification request
+POST http://localhost:5000/email-verification
+Content-Type: application/json
+
+{
+    "email": "rizalharyo14@gmail.com"
+}
+
+###
+//email verification otp verification
+POST http://localhost:5000/verify-email-verification-otp
+Content-Type: application/json
+
+{
+    "email": "rizalharyo14@gmail.com",
+    "otp": "9400"
+}
+
+###
+//forgot password
+POST http://localhost:5000/forgot-password
+Content-Type: application/json
+
+{
+    "email": "rizalharyo14@gmail.com"
+}
+
+###
+//otp verify
+POST http://localhost:5000/verify-otp
+Content-Type: application/json
+
+{
+    "email": "rizalharyo14@gmail.com",
+    "otp": "2586"
+}
+
+###
+//reset password
+POST http://localhost:5000/reset-password
+Content-Type: application/json
+
+{
+    "email": "rizalharyo14@gmail.com",
+    "newPassword": "rizal123"
+}

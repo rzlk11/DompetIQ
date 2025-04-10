@@ -85,7 +85,6 @@ const HalamanTerjadwal = () => {
     try {
       const params = {};
       if (type) params.type = type;
-      
       const response = await axios.get("http://localhost:5000/category", {
         params,
         headers: {
@@ -102,17 +101,20 @@ const HalamanTerjadwal = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    if(editingTransaction) {
+      setEditingTransaction({
+        ...editingTransaction,
+        [name]: value
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+    }
 
     if (name === 'type' && value) {
       fetchCategories(value);
-      setFormData(prev => ({
-        ...prev,
-        category_name: ""
-      }));
     }
   };
 
@@ -176,7 +178,7 @@ const HalamanTerjadwal = () => {
           start_date: editingTransaction.start_date,
           end_date: editingTransaction.end_date,
           description: editingTransaction.description,
-          category_name: editingTransaction.category
+          category_name: editingTransaction.category_name
         },
         {
           headers: {
@@ -797,10 +799,7 @@ const HalamanTerjadwal = () => {
                 <select
                   name="type"
                   value={editingTransaction.type}
-                  onChange={(e) => setEditingTransaction({
-                    ...editingTransaction,
-                    type: e.target.value
-                  })}
+                  onChange={handleInputChange}
                   className="w-full p-2 border rounded"
                   required
                 >
@@ -815,10 +814,7 @@ const HalamanTerjadwal = () => {
                   type="number"
                   name="amount"
                   value={editingTransaction.amount}
-                  onChange={(e) => setEditingTransaction({
-                    ...editingTransaction,
-                    amount: e.target.value
-                  })}
+                  onChange={handleInputChange}
                   className="w-full p-2 border rounded"
                   required
                 />
@@ -833,11 +829,8 @@ const HalamanTerjadwal = () => {
                 ) : (
                   <select
                     name="category_name"
-                    value={editingTransaction.category}
-                    onChange={(e) => setEditingTransaction({
-                      ...editingTransaction,
-                      category: e.target.value
-                    })}
+                    value={editingTransaction.category_name}
+                    onChange={handleInputChange}
                     className="w-full p-2 border rounded"
                     required
                   >
@@ -856,10 +849,7 @@ const HalamanTerjadwal = () => {
                 <select
                   name="period"
                   value={editingTransaction.period}
-                  onChange={(e) => setEditingTransaction({
-                    ...editingTransaction,
-                    period: e.target.value
-                  })}
+                  onChange={handleInputChange}
                   className="w-full p-2 border rounded"
                   required
                 >
@@ -875,10 +865,7 @@ const HalamanTerjadwal = () => {
                   type="date"
                   name="start_date"
                   value={editingTransaction.start_date}
-                  onChange={(e) => setEditingTransaction({
-                    ...editingTransaction,
-                    start_date: e.target.value
-                  })}
+                  onChange={handleInputChange}
                   className="w-full p-2 border rounded"
                   required
                 />
@@ -890,10 +877,7 @@ const HalamanTerjadwal = () => {
                   type="date"
                   name="end_date"
                   value={editingTransaction.end_date}
-                  onChange={(e) => setEditingTransaction({
-                    ...editingTransaction,
-                    end_date: e.target.value
-                  })}
+                  onChange={handleInputChange}
                   className="w-full p-2 border rounded"
                 />
               </div>
@@ -903,10 +887,7 @@ const HalamanTerjadwal = () => {
                 <textarea
                   name="description"
                   value={editingTransaction.description}
-                  onChange={(e) => setEditingTransaction({
-                    ...editingTransaction,
-                    description: e.target.value
-                  })}
+                  onChange={handleInputChange}
                   className="w-full p-2 border rounded h-24"
                 />
               </div>

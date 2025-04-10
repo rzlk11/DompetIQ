@@ -667,7 +667,7 @@ const HalamanTerjadwal = () => {
             <div className="text-center font-semibold text-xl p-4 border-b">
               TAMBAH PENGELUARAN TERJADWAL
             </div>
-            <form onSubmit={(e) => handleSubmit(e, true)} className="p-4">
+            <form onSubmit={(e) => handleSubmit(e, false)} className="p-4">
               {/* Jumlah */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Jumlah</label>

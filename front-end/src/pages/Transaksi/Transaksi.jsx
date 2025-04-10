@@ -6,7 +6,8 @@ import axios from "axios";
 import { 
   KeyboardArrowLeft, KeyboardArrowRight, MoreVert, 
   Add, Remove, CalendarToday, KeyboardArrowDown,
-  Close, Search, ExpandMore, Edit, Delete
+  Close, Search, ExpandMore, Edit, Delete,
+  AttachMoney
 } from "@mui/icons-material";
 
 const Transaksi = () => {
@@ -493,83 +494,84 @@ const Transaksi = () => {
       {/* Form Pemasukan */}
       {showIncomeForm && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div 
-            ref={incomeFormRef}
-            className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Tambah Pemasukan</h2>
-              <button onClick={() => setShowIncomeForm(false)}>
-                <Close fontSize="small" />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Jumlah</label>
-                <input
-                  type="number"
-                  name="amount"
-                  value={formData.amount}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
-                  required
-                />
+          <div ref={incomeFormRef} className="w-full max-w-md shadow-lg bg-white rounded">
+            <div className="p-0">
+              <div className="text-center font-semibold text-xl p-4 border-b">
+                TAMBAH PEMASUKAN
               </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Kategori</label>
-                {loadingCategories ? (
-                  <div className="p-2 text-center">Memuat kategori...</div>
-                ) : categoryError ? (
-                  <div className="text-red-500 text-sm">{categoryError}</div>
-                ) : (
-                  <select
-                    name="category_name"
-                    value={formData.category_name}
+              <form onSubmit={handleSubmit} className="p-4">
+                
+                {/* Jumlah */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Jumlah</label>
+                  <input
+                    type="number"
+                    name="amount"
+                    value={formData.amount}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Masukkan jumlah"
                     required
+                  />
+                </div>
+
+                {/* Kategori */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Kategori</label>
+                  {loadingCategories ? (
+                    <div className="p-2 text-center">Memuat kategori...</div>
+                  ) : categoryError ? (
+                    <div className="text-red-500 text-sm">{categoryError}</div>
+                  ) : (
+                    <select
+                      name="category_name"
+                      value={formData.category_name}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="">Pilih Kategori</option>
+                      {categories.map((category) => (
+                        <option key={category.uuid} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                {/* Transaksi Terjadwal */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Transaksi Terjadwal?</label>
+                  <select
+                    name="is_scheduled"
+                    value={formData.is_scheduled}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">Pilih Kategori</option>
-                    {categories.map((category) => (
-                      <option key={category.uuid} value={category.name}>
-                        {category.name}
-                      </option>
-                    ))}
+                    <option value="false">Tidak</option>
+                    <option value="true">Ya</option>
                   </select>
-                )}
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Transaksi Terjadwal?</label>
-                <select
-                  name="is_scheduled"
-                  value={formData.is_scheduled}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="false">Tidak</option>
-                  <option value="true">Ya</option>
-                </select>
-              </div>
-              
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowIncomeForm(false)}
-                  className="px-4 py-2 border border-gray-300 rounded"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded"
-                >
-                  Simpan
-                </button>
-              </div>
-            </form>
+                </div>
+
+                {/* Tombol */}
+                <div className="flex justify-end space-x-2 mt-6">
+                  <button
+                    type="button"
+                    className="px-4 py-2 text-green-500 rounded hover:bg-blue-50"
+                    onClick={() => setShowIncomeForm(false)}
+                  >
+                    BATAL
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                  >
+                    SIMPAN
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
@@ -577,83 +579,84 @@ const Transaksi = () => {
       {/* Form Pengeluaran */}
       {showExpenseForm && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div 
-            ref={expenseFormRef}
-            className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Tambah Pengeluaran</h2>
-              <button onClick={() => setShowExpenseForm(false)}>
-                <Close fontSize="small" />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Jumlah</label>
-                <input
-                  type="number"
-                  name="amount"
-                  value={formData.amount}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
-                  required
-                />
+          <div ref={incomeFormRef} className="w-full max-w-md shadow-lg bg-white rounded">
+            <div className="p-0">
+              <div className="text-center font-semibold text-xl p-4 border-b">
+                TAMBAH PENGELUARAN
               </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Kategori</label>
-                {loadingCategories ? (
-                  <div className="p-2 text-center">Memuat kategori...</div>
-                ) : categoryError ? (
-                  <div className="text-red-500 text-sm">{categoryError}</div>
-                ) : (
-                  <select
-                    name="category_name"
-                    value={formData.category_name}
+              <form onSubmit={handleSubmit} className="p-4">
+                
+                {/* Jumlah */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Jumlah</label>
+                  <input
+                    type="number"
+                    name="amount"
+                    value={formData.amount}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Masukkan jumlah"
                     required
+                  />
+                </div>
+
+                {/* Kategori */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Kategori</label>
+                  {loadingCategories ? (
+                    <div className="p-2 text-center">Memuat kategori...</div>
+                  ) : categoryError ? (
+                    <div className="text-red-500 text-sm">{categoryError}</div>
+                  ) : (
+                    <select
+                      name="category_name"
+                      value={formData.category_name}
+                      onChange={handleInputChange}
+                      className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="">Pilih Kategori</option>
+                      {categories.map((category) => (
+                        <option key={category.uuid} value={category.name}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+
+                {/* Transaksi Terjadwal */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Transaksi Terjadwal?</label>
+                  <select
+                    name="is_scheduled"
+                    value={formData.is_scheduled}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">Pilih Kategori</option>
-                    {categories.map((category) => (
-                      <option key={category.uuid} value={category.name}>
-                        {category.name}
-                      </option>
-                    ))}
+                    <option value="false">Tidak</option>
+                    <option value="true">Ya</option>
                   </select>
-                )}
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Transaksi Terjadwal?</label>
-                <select
-                  name="is_scheduled"
-                  value={formData.is_scheduled}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
-                >
-                  <option value="false">Tidak</option>
-                  <option value="true">Ya</option>
-                </select>
-              </div>
-              
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowExpenseForm(false)}
-                  className="px-4 py-2 border border-gray-300 rounded"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-red-500 text-white rounded"
-                >
-                  Simpan
-                </button>
-              </div>
-            </form>
+                </div>
+
+                {/* Tombol */}
+                <div className="flex justify-end space-x-2 mt-6">
+                  <button
+                    type="button"
+                    className="px-4 py-2 text-green-500 rounded hover:bg-blue-50"
+                    onClick={() => setShowExpenseForm(false)}
+                  >
+                    BATAL
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                  >
+                    SIMPAN
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

@@ -10,6 +10,7 @@ import TransactionRoute from "./routes/TransactionRoute.js";
 import AuthRoute from "./routes/AuthRoute.js";
 import CategoryRoute from "./routes/CategoryRoute.js";
 import ScheduledRoute from "./routes/ScheduledRoute.js";
+import Dashboard from "./routes/DashboardRoute.js";
 dotenv.config();
 
 const app = express();
@@ -20,19 +21,9 @@ const store = new sessionStore({
   db: db,
 });
 
-(async () => {
-  await db.sync();
-})();
-
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-    store: store,
-    cookie: { secure: "auto" },
-  })
-);
+// (async () => {
+//   await db.sync();
+// })();
 
 app.use(
   cors({
@@ -42,14 +33,25 @@ app.use(
 );
 
 app.use(express.json());
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: store,
+    cookie: { secure: "auto" },
+  })
+);
+
 app.use(UserRoute);
 app.use(BudgetRoute);
 app.use(TransactionRoute);
 app.use(CategoryRoute);
 app.use(ScheduledRoute);
 app.use(AuthRoute);
-
-store.sync();
+app.use(Dashboard);
+// store.sync();
 
 app.listen(process.env.APP_PORT, () => {
   console.log(`Server is running on port ${process.env.APP_PORT}`);

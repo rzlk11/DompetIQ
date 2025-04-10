@@ -24,7 +24,7 @@ const Settings = () => {
       </div>
 
       {/* Languages */}
-      <div className="flex items-center justify-between mb-6 border-b pb-4">
+      {/* <div className="flex items-center justify-between mb-6 border-b pb-4">
         <label className="font-medium">Bahasa:</label>
         <div className="flex items-center">
           <div className="relative w-64">
@@ -42,10 +42,10 @@ const Settings = () => {
           </div>
           <button className="ml-4 text-green-500 font-medium">Simpan</button>
         </div>
-      </div>
+      </div> */}
 
       {/* Currency */}
-      <div className="flex items-center justify-between mb-6 border-b pb-4">
+      {/* <div className="flex items-center justify-between mb-6 border-b pb-4">
         <label className="font-medium">Mata Uang:</label>
         <div className="flex items-center">
           <div className="relative w-64">
@@ -64,7 +64,7 @@ const Settings = () => {
           </div>
           <button className="ml-4 text-green-500 font-medium">Simpan</button>
         </div>
-      </div>
+      </div> */}
 
       {/* General Settings */}
       <div className="mb-6">
@@ -108,7 +108,7 @@ const Settings = () => {
         </div>
         
         {/* Transaction time toggle */}
-        <div className="flex items-center mb-4">
+        {/* <div className="flex items-center mb-4">
           <label className="relative inline-flex items-center cursor-pointer">
             <input 
               type="checkbox" 
@@ -122,10 +122,10 @@ const Settings = () => {
             <AccessTimeIcon className="text-green-500 mr-2" />
             <span>Transactions - Set the time of the transactions</span>
           </div>
-        </div>
+        </div> */}
         
         {/* Default option */}
-        <div className="flex items-center ml-16 mb-4">
+        {/* <div className="flex items-center ml-16 mb-4">
           <label className="w-24 font-medium">Default:</label>
           <div className="relative w-64">
             <select 
@@ -140,7 +140,7 @@ const Settings = () => {
               <ExpandMoreIcon className="text-gray-400" />
             </div>
           </div>
-        </div>
+        </div> */}
         
         <div className="flex justify-end mt-6">
           <button className="text-green-500 font-medium">Simpan</button>

@@ -22,7 +22,6 @@ const Kalender = () => {
         }
       });
       setTransactions(response.data);
-      console.log(response.data);
     } catch (error) {
       console.error('Gagal mengambil transaksi:', error);
     }

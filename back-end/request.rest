@@ -103,3 +103,6 @@ Content-Type: application/json
     "start_date": "2025-03-26",
     "end_date": "2025-03-27"
 }
+
+###
+GET http://localhost:5000/dashboard/monthly-comparison

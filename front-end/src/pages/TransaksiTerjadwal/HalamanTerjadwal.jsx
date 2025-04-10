@@ -26,6 +26,7 @@ const HalamanTerjadwal = () => {
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [categoryError, setCategoryError] = useState(null);
   
+  
   const [formData, setFormData] = useState({
     amount: "",
     type: "expense",
@@ -543,18 +544,12 @@ const HalamanTerjadwal = () => {
       {/* Form Pemasukan Terjadwal */}
       {showIncomeForm && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div 
-            ref={incomeFormRef}
-            className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Tambah Pemasukan Terjadwal</h2>
-              <button onClick={() => setShowIncomeForm(false)}>
-                <Close fontSize="small" />
-              </button>
+          <div className="w-full max-w-md shadow-lg bg-white rounded">
+            <div className="text-center font-semibold text-xl p-4 border-b">
+              TAMBAH PEMASUKAN TERJADWAL
             </div>
-            
-            <form onSubmit={(e) => handleSubmit(e, true)}>
+            <form onSubmit={(e) => handleSubmit(e, true)} className="p-4">
+              {/* Jumlah */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Jumlah</label>
                 <input
@@ -562,11 +557,12 @@ const HalamanTerjadwal = () => {
                   name="amount"
                   value={formData.amount}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
-              
+
+              {/* Kategori */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Kategori</label>
                 {loadingCategories ? (
@@ -578,7 +574,7 @@ const HalamanTerjadwal = () => {
                     name="category_name"
                     value={formData.category_name}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   >
                     <option value="">Pilih Kategori</option>
@@ -590,14 +586,15 @@ const HalamanTerjadwal = () => {
                   </select>
                 )}
               </div>
-              
+
+              {/* Periode */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Periode</label>
                 <select
                   name="period"
                   value={formData.period}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
                   <option value="monthly">Bulanan</option>
@@ -605,7 +602,8 @@ const HalamanTerjadwal = () => {
                   <option value="daily">Harian</option>
                 </select>
               </div>
-              
+
+              {/* Tanggal Mulai */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Tanggal Mulai</label>
                 <input
@@ -613,11 +611,12 @@ const HalamanTerjadwal = () => {
                   name="start_date"
                   value={formData.start_date}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
-              
+
+              {/* Tanggal Berakhir */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Tanggal Berakhir (Opsional)</label>
                 <input
@@ -625,33 +624,35 @@ const HalamanTerjadwal = () => {
                   name="end_date"
                   value={formData.end_date}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
+
+              {/* Deskripsi */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Deskripsi (Opsional)</label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded h-24"
+                  className="w-full p-2 border rounded h-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
-              <div className="flex justify-end gap-2">
+
+              {/* Buttons */}
+              <div className="flex justify-end space-x-2 mt-6">
                 <button
                   type="button"
+                  className="px-4 py-2 text-green-500 rounded hover:bg-blue-50"
                   onClick={() => setShowIncomeForm(false)}
-                  className="px-4 py-2 border border-gray-300 rounded"
                 >
-                  Batal
+                  BATAL
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded"
+                  className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
                 >
-                  Simpan
+                  SIMPAN
                 </button>
               </div>
             </form>
@@ -662,18 +663,12 @@ const HalamanTerjadwal = () => {
       {/* Form Pengeluaran Terjadwal */}
       {showExpenseForm && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div 
-            ref={expenseFormRef}
-            className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md"
-          >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Tambah Pengeluaran Terjadwal</h2>
-              <button onClick={() => setShowExpenseForm(false)}>
-                <Close fontSize="small" />
-              </button>
+          <div className="w-full max-w-md shadow-lg bg-white rounded">
+            <div className="text-center font-semibold text-xl p-4 border-b">
+              TAMBAH PENGELUARAN TERJADWAL
             </div>
-            
-            <form onSubmit={(e) => handleSubmit(e, false)}>
+            <form onSubmit={(e) => handleSubmit(e, true)} className="p-4">
+              {/* Jumlah */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Jumlah</label>
                 <input
@@ -681,11 +676,12 @@ const HalamanTerjadwal = () => {
                   name="amount"
                   value={formData.amount}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
-              
+
+              {/* Kategori */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Kategori</label>
                 {loadingCategories ? (
@@ -697,7 +693,7 @@ const HalamanTerjadwal = () => {
                     name="category_name"
                     value={formData.category_name}
                     onChange={handleInputChange}
-                    className="w-full p-2 border rounded"
+                    className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   >
                     <option value="">Pilih Kategori</option>
@@ -709,14 +705,15 @@ const HalamanTerjadwal = () => {
                   </select>
                 )}
               </div>
-              
+
+              {/* Periode */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Periode</label>
                 <select
                   name="period"
                   value={formData.period}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 >
                   <option value="monthly">Bulanan</option>
@@ -724,7 +721,8 @@ const HalamanTerjadwal = () => {
                   <option value="daily">Harian</option>
                 </select>
               </div>
-              
+
+              {/* Tanggal Mulai */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Tanggal Mulai</label>
                 <input
@@ -732,11 +730,12 @@ const HalamanTerjadwal = () => {
                   name="start_date"
                   value={formData.start_date}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </div>
-              
+
+              {/* Tanggal Berakhir */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Tanggal Berakhir (Opsional)</label>
                 <input
@@ -744,33 +743,36 @@ const HalamanTerjadwal = () => {
                   name="end_date"
                   value={formData.end_date}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded"
+                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
                 />
               </div>
-              
+
+              {/* Deskripsi */}
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Deskripsi (Opsional)</label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  className="w-full p-2 border rounded h-24"
+                  className="w-full p-2 border rounded h-24 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              
-              <div className="flex justify-end gap-2">
+
+              {/* Buttons */}
+              <div className="flex justify-end space-x-2 mt-6">
                 <button
                   type="button"
+                  className="px-4 py-2 text-green-500 rounded hover:bg-blue-50"
                   onClick={() => setShowExpenseForm(false)}
-                  className="px-4 py-2 border border-gray-300 rounded"
                 >
-                  Batal
+                  BATAL
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-red-500 text-white rounded"
+                  className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
                 >
-                  Simpan
+                  SIMPAN
                 </button>
               </div>
             </form>

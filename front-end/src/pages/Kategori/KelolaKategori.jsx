@@ -38,6 +38,8 @@ const KelolaKategori = () => {
   const [editingText, setEditingText] = useState("");
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingCategory, setDeletingCategory] = useState(null);
 
   // Fetch categories dari backend
   const fetchCategories = async (type) => {
@@ -145,6 +147,7 @@ const KelolaKategori = () => {
         }
       });
       loadCategories();
+      setShowDeleteModal(false);
     } catch (err) {
       setError(err.response?.data?.msg || "Gagal menghapus kategori");
     }
@@ -243,7 +246,10 @@ const KelolaKategori = () => {
                     <EditIcon sx={{ fontSize: 18 }} />
                   </button>
                   <button
-                    onClick={() => handleDeleteCategory(category.uuid)}
+                    onClick={() =>{
+                      setDeletingCategory(category)
+                      setShowDeleteModal(true)
+                      }}
                     className="text-red-500 mr-2"
                   >
                     <DeleteIcon sx={{ fontSize: 18 }} />
@@ -348,6 +354,33 @@ const KelolaKategori = () => {
                 className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
               >
                 Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Konfirmasi Hapus */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Hapus Category?</h2>
+            <p className="mb-6">Anda yakin ingin menghapus category ini?</p>
+            
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 border border-gray-300 rounded"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => 
+                  handleDeleteCategory(deletingCategory.uuid)
+                }
+                className="px-4 py-2 bg-red-500 text-white rounded"
+              >
+                Hapus
               </button>
             </div>
           </div>

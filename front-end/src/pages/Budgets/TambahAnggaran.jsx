@@ -74,7 +74,6 @@ const BudgetForm = () => {
     }
   };
 
-  // Income categories with Material UI icons and sublists
   // const [incomeCategories, setIncomeCategories] = useState([
   //   {
   //     name: 'Pendapatan Keuangan',
@@ -249,50 +248,7 @@ const BudgetForm = () => {
           <div className="text-center font-semibold text-xl p-4 border-b">
             BUAT ANGGARAN BARU
           </div>
-
-          {/* Tabs */}
-          {/* <div className="grid grid-cols-3 border-b">
-            <button
-              className={`py-3 px-2 text-sm ${activeTab === 'single' ? 'bg-white' : 'bg-gray-100'}`}
-              onClick={() => handleTabChange('single')}
-            >
-              Kategori Tunggal 
-            </button>
-            <button
-              className={`py-3 px-2 text-sm ${activeTab === 'multi' ? 'bg-white' : 'bg-gray-100'}`}
-              onClick={() => handleTabChange('multi')}
-            >
-              Multi Kategori
-            </button>
-            <button
-              className={`py-3 px-2 text-sm ${activeTab === 'all' ? 'bg-white' : 'bg-gray-100'}`}
-              onClick={() => handleTabChange('all')}
-            >
-              Semua Kategori
-            </button>
-          </div> */}
-
           <form onSubmit={handleSubmit} className="p-4">
-            {/* Name (only in Multi-category) */}
-            {/* {activeTab === 'multi' && (
-              <div className="mb-4">
-                <div className="flex items-center mb-2">
-                  <div className="mr-4 text-gray-700">
-                    <AccountBalanceIcon />
-                  </div>
-                  <label className="block text-sm font-medium">Name</label>
-                </div>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Masukkan nama"
-                />
-              </div>
-            )} */}
-
             {/* Budget Amount */}
             <div className="mb-4">
               <div className="flex items-center mb-2">
@@ -341,25 +297,6 @@ const BudgetForm = () => {
                 </div>
               )}
             </div>
-
-            {/* Account - now editable */}
-            {/* <div className="mb-4">
-              <div className="flex items-center mb-2">
-                <div className="mr-4 text-gray-700">
-                  <AccountBalanceWalletIcon />
-                </div>
-                <label className="block text-sm font-medium">Sumber</label>
-              </div>
-              <input
-                type="text"
-                name="account"
-                value={formData.account}
-                onChange={handleInputChange}
-                className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Masukkan sumber dana"
-              />
-            </div> */}
-
             {/* Duration - now shown in all tabs */}
             <div className="mb-4">
               <div className="flex items-center mb-2">
@@ -438,29 +375,8 @@ const BudgetForm = () => {
                     className="flex items-center p-3 cursor-pointer hover:bg-gray-100"
                     onClick={() => selectCategory(category)}
                   >
-                    {/* <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                      {React.createElement(category.icon, { className: "text-green-500" })}
-                    </div> */}
                     <div className="flex-grow">{category.name}</div>
-                    {/* {category.sublist.length > 0 && (
-                      <ExpandMoreIcon className={`transform ${expandedCategory === category.name ? 'rotate-180' : ''}`} />
-                    )} */}
                   </div>
-
-                  {/* Sublist items if expanded */}
-                  {/* {expandedCategory === category.name && category.sublist.length > 0 && (
-                    <div className="pl-16 bg-gray-50">
-                      {category.sublist.map((subcategory, subIdx) => (
-                        <div
-                          key={subIdx}
-                          className="py-2 px-4 cursor-pointer hover:bg-gray-100"
-                          onClick={() => selectCategory(category, subcategory)}
-                        >
-                          {subcategory.name}
-                        </div>
-                      ))}
-                    </div>
-                  )} */}
                 </div>
               ))}
             </div>

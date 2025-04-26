@@ -4,7 +4,6 @@ import { LogOut, reset } from '../features/authSlice';
 import { useNavigate, useLocation } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
@@ -193,14 +192,6 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
           )}
         </div>
         
-        {/* Help button */}
-        <button 
-          className="p-2 rounded-full hover:bg-gray-100"
-          onClick={() => navigate('/help')}
-        >
-          <HelpOutlineIcon fontSize="small" />
-        </button>
-        
         {/* User profile button */}
         <div className="relative" ref={profileMenuRef}>
           <button 
@@ -218,12 +209,6 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
                 <p className="text-sm text-gray-500">{user.email}</p>
               </div>
               <div>
-                <button 
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-50"
-                  onClick={() => navigate('/profile')}
-                >
-                  Profile
-                </button>
                 <button 
                   className="block w-full text-left px-4 py-2 hover:bg-gray-50"
                   onClick={() => navigate('/pengaturan')}

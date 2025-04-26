@@ -4,6 +4,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import MailOutlineIcon from '@mui/icons-material/MailOutline';
 import LockIcon from '@mui/icons-material/Lock';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 const LupaPassword = () => {
   const [email, setEmail] = useState('');
@@ -18,6 +20,8 @@ const LupaPassword = () => {
   const [updatePasswordErrorMessage, setUpdatePasswordErrorMessage] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const sendPasswordOTP = async () => {
     try {
@@ -96,11 +100,6 @@ const LupaPassword = () => {
     if(isValid) {
       setStep(2)
     }
-    // Simulate API call
-    // setTimeout(() => {
-    //   setLoading(false);
-    //   setStep(2);
-    // }, 1500);
   };
 
   // Handle OTP verification
@@ -113,11 +112,6 @@ const LupaPassword = () => {
     if(isValid){
       setStep(3);
     }
-    // Simulate API call
-    // setTimeout(() => {
-    //   setLoading(false);
-    //   setStep(3);
-    // }, 1500);
   };
 
   // Handle password reset
@@ -130,11 +124,6 @@ const LupaPassword = () => {
     if(isValid) {
       setStep(4);
     }
-    // Simulate API call
-    // setTimeout(() => {
-    //   setLoading(false);
-    //   setStep(4);
-    // }, 1500);
   };
 
   // Handle new password input change
@@ -145,6 +134,16 @@ const LupaPassword = () => {
   // Handle confirm password input change
   const handleConfirmPasswordChange = (e) => {
     setConfirmPassword(e.target.value);
+  };
+
+  // Toggle password visibility for new password
+  const toggleNewPasswordVisibility = () => {
+    setShowNewPassword(!showNewPassword);
+  };
+
+  // Toggle password visibility for confirm password
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   return (
@@ -257,28 +256,46 @@ const LupaPassword = () => {
                 <label className="block text-gray-700 text-sm font-medium mb-2">
                   Password Baru
                 </label>
-                <input
-                  type="password"
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Masukkan password baru"
-                  value={newPassword}
-                  onChange={handlePasswordChange}
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Masukkan password baru"
+                    value={newPassword}
+                    onChange={handlePasswordChange}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2 top-2 text-gray-500"
+                    onClick={toggleNewPasswordVisibility}
+                  >
+                    {showNewPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </button>
+                </div>
               </div>
               
               <div className="mb-6">
                 <label className="block text-gray-700 text-sm font-medium mb-2">
                   Konfirmasi Password
                 </label>
-                <input
-                  type="password"
-                  className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Masukkan ulang password baru"
-                  value={confirmPassword}
-                  onChange={handleConfirmPasswordChange}
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    placeholder="Masukkan ulang password baru"
+                    value={confirmPassword}
+                    onChange={handleConfirmPasswordChange}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2 top-2 text-gray-500"
+                    onClick={toggleConfirmPasswordVisibility}
+                  >
+                    {showConfirmPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </button>
+                </div>
                 {confirmPassword && newPassword !== confirmPassword && (
                   <p className="text-red-500 text-sm mt-1">Password tidak sama</p>
                 )}

@@ -1,4 +1,5 @@
 import Users from "../models/UserModel.js";
+import Categories from "../models/CategoryModel.js";
 import argon2 from "argon2";
 
 export const createUser = async (req, res) => {
@@ -8,18 +9,47 @@ export const createUser = async (req, res) => {
   }
   const user = await Users.findOne({
     where: {
-      username: req.body.username
-    }
+      username: req.body.username,
+    },
   });
-  if(user) return res.status(403).json({error: "Username is already used!"});
+  if (user) return res.status(403).json({ error: "Username is already used!" });
   const hashedPassword = await argon2.hash(password);
   try {
-    await Users.create({
+    // 1. Buat user
+    const newUser = await Users.create({
       username,
       email,
       password: hashedPassword,
     });
-    res.status(201).json("Registration successful");
+
+    // 2. Default kategori
+    const defaultCategories = [
+      { name: "Gaji Utama", type: "income" },
+      { name: "Gaji Paruh Waktu", type: "income" },
+      { name: "Bonus Pekerjaan", type: "income" },
+      { name: "Penjualan Online", type: "income" },
+      { name: "Hadiah", type: "income" },
+      { name: "Makanan dan Minuman", type: "expense" },
+      { name: "Listrik", type: "expense" },
+      { name: "PDAM", type: "expense" },
+      { name: "Liburan", type: "expense" },
+      { name: "Transportasi", type: "expense" },
+      { name: "Pakaian", type: "expense" },
+      { name: "Iuran BPJS", type: "expense" },
+      { name: "Asuransi", type: "expense" },
+      { name: "Internet", type: "expense" },
+    ];
+
+    // 3. Tambahkan userId (atau user.uuid tergantung relasi kamu)
+    const categoriesWithUser = defaultCategories.map((cat) => ({
+      ...cat,
+      userId: newUser.id, // gunakan newUser.uuid kalau relasinya pakai UUID
+    }));
+
+    // 4. Simpan ke DB
+    await Categories.bulkCreate(categoriesWithUser);
+
+    res.status(201).json("Registration successful with default categories");
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

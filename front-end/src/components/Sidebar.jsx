@@ -37,7 +37,7 @@ const Sidebar = () => {
     // Add any logout logic here (clear tokens, etc.)
     dispatch(LogOut());
     dispatch(reset());
-    navigate('/login');
+    navigate('/');
   };
 
   // Function to handle navigation to Anggaran page

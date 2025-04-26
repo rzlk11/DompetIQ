@@ -1,19 +1,18 @@
 import express from "express";
 import {
-  getRekening,
+  getRekenings,
   getRekeningById,
   createRekening,
   updateRekening,
   deleteRekening,
-} from "../controllers/Rekening.js";
-import { verifyUser } from "../middleware/AuthUser.js";
+} from "../controllers/RekeningController.js";
 
 const router = express.Router();
 
-router.get("/rekening", verifyUser, getRekening);
-router.get("/rekening/:id", verifyUser, getRekeningById);
-router.post("/rekening", verifyUser, createRekening);
-router.patch("/rekening/:id", verifyUser,  updateRekening);
-router.delete("/rekening/:id", verifyUser, deleteRekening);
+router.get("/rekenings", getRekenings); // Get all rekenings
+router.get("/rekenings/:id", getRekeningById); // Get a single rekening by ID
+router.post("/rekenings", createRekening); // Create a new rekening
+router.put("/rekenings/:id", updateRekening); // Update an existing rekening
+router.delete("/rekenings/:id", deleteRekening); // Delete a rekening
 
 export default router;

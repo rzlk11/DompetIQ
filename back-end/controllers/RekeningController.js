@@ -13,7 +13,7 @@ export const getRekening = async (req, res) => {
       attributes: [
         "uuid",
         "balance",
-        "account_number",
+        "name",
         [
           Sequelize.fn(
             "DATE_FORMAT",
@@ -48,7 +48,7 @@ export const getRekeningById = async (req, res) => {
       attributes: [
         "uuid",
         "balance",
-        "account_number",
+        "name",
         [Sequelize.literal("user.username"), "user"],
       ],
     });
@@ -59,11 +59,11 @@ export const getRekeningById = async (req, res) => {
 };
 
 export const createRekening = async (req, res) => {
-  const { balance, account_number } = req.body;
+  const { balance, name } = req.body;
   try {
     await Rekening.create({
       balance: balance,
-      account_number: account_number,
+      name: name,
       userId: req.userId,
     });
     res.status(201).json({ msg: "Rekening berhasil dibuat" });
@@ -73,7 +73,7 @@ export const createRekening = async (req, res) => {
 };
 
 export const updateRekening = async (req, res) => {
-  const { balance, account_number } = req.body;
+  const { balance, name } = req.body;
 
   const rekening = await Rekening.findOne({
     where: {
@@ -89,7 +89,7 @@ export const updateRekening = async (req, res) => {
     await Rekening.update(
       {
         balance: balance,
-        account_number: account_number,
+        name: name,
       },
       {
         where: {

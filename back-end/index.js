@@ -14,7 +14,7 @@ import Dashboard from "./routes/DashboardRoute.js";
 import OTPRoute from "./routes/OTPRoutes.js";
 import EmailVerificationRoute from "./routes/EmailVerificationRoute.js";
 import ForgotPasswordRoute from "./routes/ForgotPasswordRoute.js";
-import rekeningRoutes from "./routes/RekeningRoute.js";
+import RekeningRoutes from "./routes/RekeningRoute.js";
 dotenv.config();
 
 const app = express();
@@ -37,7 +37,7 @@ app.use(
 );
 
 app.use(express.json());
-app.use("/api", rekeningRoutes);
+app.use("/api", RekeningRoutes);
 
 app.use(
   session({

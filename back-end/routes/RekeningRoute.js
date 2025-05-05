@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  getRekenings,
+  getRekening,
   getRekeningById,
   createRekening,
   updateRekening,
@@ -9,10 +9,10 @@ import {
 
 const router = express.Router();
 
-router.get("/rekenings", getRekenings); // Get all rekenings
-router.get("/rekenings/:id", getRekeningById); // Get a single rekening by ID
-router.post("/rekenings", createRekening); // Create a new rekening
-router.put("/rekenings/:id", updateRekening); // Update an existing rekening
-router.delete("/rekenings/:id", deleteRekening); // Delete a rekening
+router.get("/rekening", getRekening); // Get all rekenings
+router.get("/rekening/:id", getRekeningById); // Get a single rekening by ID
+router.post("/rekening", createRekening); // Create a new rekening
+router.put("/rekening/:id", updateRekening); // Update an existing rekening
+router.delete("/rekening/:id", deleteRekening); // Delete a rekening
 
 export default router;

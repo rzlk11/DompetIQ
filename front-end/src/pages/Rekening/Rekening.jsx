@@ -142,7 +142,7 @@ export default function Rekening() {
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/rekening');
+        const response = await axios.get('http://localhost:5000/rekening');
         setAccounts(response.data);
       } catch (error) {
         console.error('Failed to fetch accounts:', error);
@@ -153,7 +153,7 @@ export default function Rekening() {
 
   const handleAddAccount = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/rekening', newAccount);
+      const response = await axios.post('http://localhost:5000/rekening', newAccount);
       setAccounts([...accounts, response.data]);
       setShowAddAccount(false);
       setNewAccount({ name: '', balance: 0, notes: '' });
@@ -164,7 +164,7 @@ export default function Rekening() {
 
   const handleEditAccount = async () => {
     try {
-      const response = await axios.put(`http://localhost:5000/api/rekening/${editAccount.uuid}`, editAccount);
+      const response = await axios.put(`http://localhost:5000/rekening/${editAccount.uuid}`, editAccount);
       setAccounts(accounts.map(acc => (acc.uuid === editAccount.uuid ? response.data : acc)));
       setShowEditAccount(false);
       setEditAccount(null);
@@ -175,7 +175,7 @@ export default function Rekening() {
 
   const handleDeleteAccount = async () => {
     try {
-      await axios.delete(`http://localhost:5000/api/rekening/${deleteAccount.uuid}`);
+      await axios.delete(`http://localhost:5000/rekening/${deleteAccount.uuid}`);
       setAccounts(accounts.filter(acc => acc.uuid !== deleteAccount.uuid));
       setShowDeleteAccount(false);
       setDeleteAccount(null);

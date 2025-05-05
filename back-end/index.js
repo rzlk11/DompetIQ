@@ -37,7 +37,6 @@ app.use(
 );
 
 app.use(express.json());
-app.use("/api", RekeningRoutes);
 
 app.use(
   session({
@@ -59,6 +58,8 @@ app.use(Dashboard);
 app.use(OTPRoute);
 app.use(EmailVerificationRoute);
 app.use(ForgotPasswordRoute);
+app.use(RekeningRoutes);
+
 
 store.sync();
 

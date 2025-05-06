@@ -28,24 +28,24 @@ const AccountCard = ({ account, onOpenMenu, menuOpen, onEdit, onDelete }) => {
             {account.balance < 0 ? '-' : ''}Rp {formatCurrency(account.balance)}
           </div>
           <div className="relative">
-            <button 
-              onClick={() => onOpenMenu(account.uuid)} 
+            <button
+              onClick={() => onOpenMenu(account.uuid)}
               className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
               aria-label="Menu"
             >
               <MoreVertical size={18} className="text-gray-500" />
             </button>
-            
+
             {menuOpen === account.uuid && (
               <div className="absolute right-0 top-8 bg-white shadow-lg rounded-md z-10 w-44 py-1 overflow-hidden">
-                <div 
-                  className="px-4 py-2.5 hover:bg-gray-100 cursor-pointer text-gray-700 flex items-center gap-2" 
+                <div
+                  className="px-4 py-2.5 hover:bg-gray-100 cursor-pointer text-gray-700 flex items-center gap-2"
                   onClick={() => onEdit(account)}
                 >
                   Edit rekening
                 </div>
-                <div 
-                  className="px-4 py-2.5 hover:bg-red-50 cursor-pointer text-red-500 flex items-center gap-2" 
+                <div
+                  className="px-4 py-2.5 hover:bg-red-50 cursor-pointer text-red-500 flex items-center gap-2"
                   onClick={() => onDelete(account)}
                 >
                   Hapus rekening
@@ -66,28 +66,28 @@ const AddAccountModal = ({ newAccount, setNewAccount, onClose, onSave }) => {
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-auto animate-fadeIn">
         <div className="p-5">
           <h2 className="text-xl font-bold mb-5 text-gray-800">Rekening Baru</h2>
-          
+
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1.5 text-gray-700">Nama</label>
-            <input 
+            <input
               type="text"
               className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
               placeholder="Nama rekening"
               value={newAccount.name}
-              onChange={(e) => setNewAccount({...newAccount, name: e.target.value})}
+              onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
             />
           </div>
-          
+
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1.5 text-gray-700">Jumlah Awal</label>
             <div className="flex items-center">
               <div className="flex-1 relative">
-                <input 
+                <input
                   type="number"
                   className="w-full border border-gray-300 rounded-lg p-2.5 pl-10 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
                   placeholder="0"
                   value={newAccount.balance}
-                  onChange={(e) => setNewAccount({...newAccount, balance: e.target.value})}
+                  onChange={(e) => setNewAccount({ ...newAccount, balance: e.target.value })}
                 />
                 <div className="absolute left-0 top-0 bottom-0 flex items-center pl-3">
                   <span className="text-gray-500">Rp</span>
@@ -95,7 +95,7 @@ const AddAccountModal = ({ newAccount, setNewAccount, onClose, onSave }) => {
               </div>
             </div>
           </div>
-          
+
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1.5 text-gray-700">Catatan (Opsional)</label>
             <textarea
@@ -103,24 +103,51 @@ const AddAccountModal = ({ newAccount, setNewAccount, onClose, onSave }) => {
               rows={3}
               placeholder="Tambahkan catatan..."
               value={newAccount.notes}
-              onChange={(e) => setNewAccount({...newAccount, notes: e.target.value})}
+              onChange={(e) => setNewAccount({ ...newAccount, notes: e.target.value })}
             />
           </div>
-          
+
           <div className="flex justify-end mt-6">
-            <button 
+            <button
               className="px-4 py-2.5 mr-3 text-gray-700 hover:bg-gray-100 rounded-lg transition font-medium"
               onClick={onClose}
             >
               Batal
             </button>
-            <button 
+            <button
               className="px-6 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium"
               onClick={onSave}
             >
               Simpan
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const DeleteAccountModal = ({ account, onClose, onConfirm }) => {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-20 p-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-auto p-5">
+        <h2 className="text-lg font-bold mb-4 text-gray-800">Hapus Rekening</h2>
+        <p className="text-sm text-gray-600 mb-6">
+          Apakah Anda yakin ingin menghapus rekening <strong>{account.name}</strong>?
+        </p>
+        <div className="flex justify-end">
+          <button
+            className="px-4 py-2 mr-3 text-gray-700 hover:bg-gray-100 rounded-lg transition font-medium"
+            onClick={onClose}
+          >
+            Batal
+          </button>
+          <button
+            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium"
+            onClick={onConfirm}
+          >
+            Hapus
+          </button>
         </div>
       </div>
     </div>
@@ -164,7 +191,14 @@ export default function Rekening() {
 
   const handleEditAccount = async () => {
     try {
-      const response = await axios.put(`http://localhost:5000/rekening/${editAccount.uuid}`, editAccount);
+      const response = await axios.put(
+        `http://localhost:5000/rekening/${editAccount.uuid}`,
+        {
+          name: editAccount.name,
+          balance: parseFloat(editAccount.balance), // Pastikan balance dikirim sebagai angka
+          notes: editAccount.notes,
+        }
+      );
       setAccounts(accounts.map(acc => (acc.uuid === editAccount.uuid ? response.data : acc)));
       setShowEditAccount(false);
       setEditAccount(null);
@@ -204,13 +238,19 @@ export default function Rekening() {
               account={account}
               menuOpen={menuOpen}
               onOpenMenu={setMenuOpen}
-              onEdit={setEditAccount}
-              onDelete={setDeleteAccount}
+              onEdit={(account) => {
+                setEditAccount(account);
+                setShowEditAccount(true); // Tampilkan modal edit
+              }}
+              onDelete={(account) => {
+                setDeleteAccount(account);
+                setShowDeleteAccount(true); // Tampilkan modal delete
+              }}
             />
           ))}
         </div>
       </div>
-      
+
       <div className="fixed bottom-4 right-4 z-10">
         <button
           onClick={() => setShowAddAccount(true)}

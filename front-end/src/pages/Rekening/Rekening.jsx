@@ -1,5 +1,5 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { Plus, MoreVertical, X, ChevronDown } from 'lucide-react';
 
 // Format currency helper
@@ -28,24 +28,24 @@ const AccountCard = ({ account, onOpenMenu, menuOpen, onEdit, onDelete }) => {
             {account.balance < 0 ? '-' : ''}Rp {formatCurrency(account.balance)}
           </div>
           <div className="relative">
-            <button 
-              onClick={() => onOpenMenu(account.id)} 
+            <button
+              onClick={() => onOpenMenu(account.uuid)}
               className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
               aria-label="Menu"
             >
               <MoreVertical size={18} className="text-gray-500" />
             </button>
-            
-            {menuOpen === account.id && (
+
+            {menuOpen === account.uuid && (
               <div className="absolute right-0 top-8 bg-white shadow-lg rounded-md z-10 w-44 py-1 overflow-hidden">
-                <div 
-                  className="px-4 py-2.5 hover:bg-gray-100 cursor-pointer text-gray-700 flex items-center gap-2" 
+                <div
+                  className="px-4 py-2.5 hover:bg-gray-100 cursor-pointer text-gray-700 flex items-center gap-2"
                   onClick={() => onEdit(account)}
                 >
                   Edit rekening
                 </div>
-                <div 
-                  className="px-4 py-2.5 hover:bg-red-50 cursor-pointer text-red-500 flex items-center gap-2" 
+                <div
+                  className="px-4 py-2.5 hover:bg-red-50 cursor-pointer text-red-500 flex items-center gap-2"
                   onClick={() => onDelete(account)}
                 >
                   Hapus rekening
@@ -66,44 +66,28 @@ const AddAccountModal = ({ newAccount, setNewAccount, onClose, onSave }) => {
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-auto animate-fadeIn">
         <div className="p-5">
           <h2 className="text-xl font-bold mb-5 text-gray-800">Rekening Baru</h2>
-          
+
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1.5 text-gray-700">Nama</label>
-            <input 
+            <input
               type="text"
               className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
               placeholder="Nama rekening"
               value={newAccount.name}
-              onChange={(e) => setNewAccount({...newAccount, name: e.target.value})}
+              onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
             />
           </div>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1.5 text-gray-700">Mata Uang Rekening</label>
-            <div className="relative">
-              <select 
-                className="w-full border border-gray-300 rounded-lg p-2.5 appearance-none focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition bg-white"
-                value={newAccount.currency}
-                onChange={(e) => setNewAccount({...newAccount, currency: e.target.value})}
-              >
-                <option>IDR - Rp</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
-                <ChevronDown size={16} className="text-gray-500" />
-              </div>
-            </div>
-          </div>
-          
+
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1.5 text-gray-700">Jumlah Awal</label>
             <div className="flex items-center">
               <div className="flex-1 relative">
-                <input 
-                  type="text"
+                <input
+                  type="number"
                   className="w-full border border-gray-300 rounded-lg p-2.5 pl-10 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
                   placeholder="0"
-                  value={newAccount.initialBalance}
-                  onChange={(e) => setNewAccount({...newAccount, initialBalance: e.target.value})}
+                  value={newAccount.balance}
+                  onChange={(e) => setNewAccount({ ...newAccount, balance: e.target.value })}
                 />
                 <div className="absolute left-0 top-0 bottom-0 flex items-center pl-3">
                   <span className="text-gray-500">Rp</span>
@@ -111,7 +95,7 @@ const AddAccountModal = ({ newAccount, setNewAccount, onClose, onSave }) => {
               </div>
             </div>
           </div>
-          
+
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1.5 text-gray-700">Catatan (Opsional)</label>
             <textarea
@@ -119,18 +103,18 @@ const AddAccountModal = ({ newAccount, setNewAccount, onClose, onSave }) => {
               rows={3}
               placeholder="Tambahkan catatan..."
               value={newAccount.notes}
-              onChange={(e) => setNewAccount({...newAccount, notes: e.target.value})}
+              onChange={(e) => setNewAccount({ ...newAccount, notes: e.target.value })}
             />
           </div>
-          
+
           <div className="flex justify-end mt-6">
-            <button 
+            <button
               className="px-4 py-2.5 mr-3 text-gray-700 hover:bg-gray-100 rounded-lg transition font-medium"
               onClick={onClose}
             >
               Batal
             </button>
-            <button 
+            <button
               className="px-6 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium"
               onClick={onSave}
             >
@@ -143,119 +127,26 @@ const AddAccountModal = ({ newAccount, setNewAccount, onClose, onSave }) => {
   );
 };
 
-// Edit Account Modal Component
-const EditAccountModal = ({ editAccount, setEditAccount, onClose, onSave }) => {
-  return (
-    <div className="fixed inset-0  bg-opacity-30 flex items-center justify-center z-20 p-4 overflow-y-auto">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-auto animate-fadeIn">
-        <div className="p-5">
-          <h2 className="text-xl font-bold mb-5 text-gray-800">EDIT AKUN</h2>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1.5 text-gray-700">Nama</label>
-            <input 
-              type="text"
-              className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              value={editAccount.name}
-              onChange={(e) => setEditAccount({...editAccount, name: e.target.value})}
-            />
-          </div>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1.5 text-gray-700">Mata uang akun</label>
-            <div className="relative">
-              <select 
-                className="w-full border border-gray-300 rounded-lg p-2.5 appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white"
-                value="Rupiah - Rp"
-                disabled
-              >
-                <option>Rupiah - Rp</option>
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none">
-                <ChevronDown size={16} className="text-gray-500" />
-              </div>
-            </div>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1.5 text-gray-700">Jumlah awal</label>
-            <div className="flex items-center">
-              <div className="flex-1 relative">
-                <input 
-                  type="text"
-                  className="w-full border border-gray-300 rounded-lg p-2.5 pl-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                  value={editAccount.initialBalance}
-                  onChange={(e) => setEditAccount({...editAccount, initialBalance: e.target.value})}
-                />
-                <div className="absolute left-0 top-0 bottom-0 flex items-center pl-3">
-                  <span className="text-gray-500">Rp</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1.5 text-gray-700">Catatan</label>
-            <textarea
-              className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              rows={3}
-              placeholder="Opsional"
-              value={editAccount.notes}
-              onChange={(e) => setEditAccount({...editAccount, notes: e.target.value})}
-            />
-          </div>
-          
-          <div className="flex justify-end mt-6">
-            <button 
-              className="px-4 py-2.5 mr-3 text-gray-700 hover:bg-gray-100 rounded-lg transition font-medium"
-              onClick={onClose}
-            >
-              MEMBATALKAN
-            </button>
-            <button 
-              className="px-6 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition font-medium"
-              onClick={onSave}
-            >
-              MENYIMPAN
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Delete Account Modal Component
 const DeleteAccountModal = ({ account, onClose, onConfirm }) => {
   return (
-    <div className="fixed inset-0  bg-opacity-40  flex items-center justify-center z-20 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-auto animate-scaleIn">
-        <div className="px-5 py-4 border-b flex justify-between items-center">
-          <h3 className="font-medium text-gray-800">HAPUS "{account.name}"?</h3>
-          <button 
-            onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
-          >
-            <X size={16} className="text-gray-500" />
-          </button>
-        </div>
-        <div className="px-5 py-4">
-          <p className="text-sm text-gray-600">
-            Semua pendapatan dan pengeluaran yang terkait dengan akun ini akan dihapus.
-          </p>
-        </div>
-        <div className="flex border-t">
-          <button 
-            className="flex-1 py-3.5 text-blue-500 font-medium border-r hover:bg-gray-50 transition-colors"
+    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-20 p-4">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-auto p-5">
+        <h2 className="text-lg font-bold mb-4 text-gray-800">Hapus Rekening</h2>
+        <p className="text-sm text-gray-600 mb-6">
+          Apakah Anda yakin ingin menghapus rekening <strong>{account.name}</strong>?
+        </p>
+        <div className="flex justify-end">
+          <button
+            className="px-4 py-2 mr-3 text-gray-700 hover:bg-gray-100 rounded-lg transition font-medium"
             onClick={onClose}
           >
-            KEMBALI
+            Batal
           </button>
-          <button 
-            className="flex-1 py-3.5 text-red-500 font-medium hover:bg-red-50 transition-colors"
+          <button
+            className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium"
             onClick={onConfirm}
           >
-            OKE
+            Hapus
           </button>
         </div>
       </div>
@@ -265,106 +156,70 @@ const DeleteAccountModal = ({ account, onClose, onConfirm }) => {
 
 // Main Banking Interface Component
 export default function Rekening() {
-  const [accounts, setAccounts] = useState([
-    { id: 1, name: 'Gopay', type: 'tabungan', balance: -65000, notes: '' },
-    { id: 2, name: 'Rekening Bank', type: 'tabungan', balance: 122000500, notes: '' },
-  ]);
-  
+  const [accounts, setAccounts] = useState([]);
   const [showAddAccount, setShowAddAccount] = useState(false);
   const [showEditAccount, setShowEditAccount] = useState(false);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [menuOpen, setMenuOpen] = useState(null);
-  
+  const [newAccount, setNewAccount] = useState({ name: '', balance: 0, notes: '' });
   const [editAccount, setEditAccount] = useState(null);
   const [deleteAccount, setDeleteAccount] = useState(null);
-  
-  const [newAccount, setNewAccount] = useState({
-    name: '',
-    currency: 'IDR - Rp',
-    initialBalance: '',
-    notes: ''
-  });
-  
-  const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
-  
-  const handleAddAccount = () => {
-    setShowAddAccount(true);
-  };
-  
-  const handleSaveNewAccount = () => {
-    const newId = accounts.length > 0 ? Math.max(...accounts.map(acc => acc.id)) + 1 : 1;
-    const initialBalance = parseInt(newAccount.initialBalance) || 0;
-    
-    setAccounts([...accounts, {
-      id: newId,
-      name: newAccount.name || 'Akun Baru',
-      type: 'Normal',
-      balance: initialBalance,
-      notes: newAccount.notes || ''
-    }]);
-    
-    setNewAccount({
-      name: '',
-      currency: 'IDR - Rp',
-      initialBalance: '',
-      notes: ''
-    });
-    
-    setShowAddAccount(false);
-  };
-  
-  const handleOpenMenu = (accountId) => {
-    if (menuOpen === accountId) {
-      setMenuOpen(null);
-    } else {
-      setMenuOpen(accountId);
+
+  // Fetch accounts from backend
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/rekening');
+        setAccounts(response.data);
+      } catch (error) {
+        console.error('Failed to fetch accounts:', error);
+      }
+    };
+    fetchAccounts();
+  }, []);
+
+  const handleAddAccount = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/rekening', newAccount);
+      setAccounts([...accounts, response.data]);
+      setShowAddAccount(false);
+      setNewAccount({ name: '', balance: 0, notes: '' });
+    } catch (error) {
+      console.error('Failed to add account:', error);
     }
   };
-  
-  const handleEdit = (account) => {
-    setEditAccount({
-      ...account,
-      currency: 'Rupiah - Rp',
-      initialBalance: account.balance.toString(),
-      notes: account.notes || ''
-    });
-    setShowEditAccount(true);
-    setMenuOpen(null);
+
+  const handleEditAccount = async () => {
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/rekening/${editAccount.uuid}`,
+        {
+          name: editAccount.name,
+          balance: parseFloat(editAccount.balance), // Pastikan balance dikirim sebagai angka
+          notes: editAccount.notes,
+        }
+      );
+      setAccounts(accounts.map(acc => (acc.uuid === editAccount.uuid ? response.data : acc)));
+      setShowEditAccount(false);
+      setEditAccount(null);
+    } catch (error) {
+      console.error('Failed to edit account:', error);
+    }
   };
-  
-  const handleDelete = (account) => {
-    setDeleteAccount(account);
-    setShowDeleteAccount(true);
-    setMenuOpen(null);
-  };
-  
-  const handleSaveEdit = () => {
-    if (!editAccount) return;
-    
-    setAccounts(accounts.map(acc => 
-      acc.id === editAccount.id 
-        ? { 
-            ...acc, 
-            name: editAccount.name, 
-            balance: parseInt(editAccount.initialBalance) || 0,
-            notes: editAccount.notes || ''
-          } 
-        : acc
-    ));
-    setShowEditAccount(false);
-  };
-  
-  const handleConfirmDelete = () => {
-    if (!deleteAccount) return;
-    
-    setAccounts(accounts.filter(acc => acc.id !== deleteAccount.id));
-    setShowDeleteAccount(false);
+
+  const handleDeleteAccount = async () => {
+    try {
+      await axios.delete(`http://localhost:5000/rekening/${deleteAccount.uuid}`);
+      setAccounts(accounts.filter(acc => acc.uuid !== deleteAccount.uuid));
+      setShowDeleteAccount(false);
+      setDeleteAccount(null);
+    } catch (error) {
+      console.error('Failed to delete account:', error);
+    }
   };
 
   return (
     <div className="max-w-md mx-auto bg-gray-50 min-h-screen relative shadow-lg md:my-6 md:min-h-0 md:rounded-xl lg:max-w-lg">
-      {/* Main Banking Interface */}
-      
       <div className="p-5">
         <div className="flex justify-between items-center mb-5">
           <div className="text-xs text-gray-500 flex items-center">
@@ -372,60 +227,61 @@ export default function Rekening() {
           </div>
           <div className="text-right">
             <div className="text-sm font-medium">
-              Total: <span className="text-green-600 font-semibold">Rp {formatCurrency(totalBalance)}</span>
+              Total: <span className="text-green-600 font-semibold">Rp {formatCurrency(accounts.reduce((sum, acc) => sum + acc.balance, 0))}</span>
             </div>
           </div>
         </div>
-        
         <div className="space-y-3">
           {accounts.map(account => (
-            <AccountCard 
-              key={account.id}
+            <AccountCard
+              key={account.uuid}
               account={account}
               menuOpen={menuOpen}
-              onOpenMenu={handleOpenMenu}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+              onOpenMenu={setMenuOpen}
+              onEdit={(account) => {
+                setEditAccount(account);
+                setShowEditAccount(true); // Tampilkan modal edit
+              }}
+              onDelete={(account) => {
+                setDeleteAccount(account);
+                setShowDeleteAccount(true); // Tampilkan modal delete
+              }}
             />
           ))}
         </div>
       </div>
-      
-      {/* Add Button */}
-      <div className="fixed bottom-0 right-6 z-10 md:absolute">
-        <button 
-          onClick={handleAddAccount}
+
+      <div className="fixed bottom-4 right-4 z-10">
+        <button
+          onClick={() => setShowAddAccount(true)}
           className="bg-green-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition-colors"
           aria-label="Tambah rekening baru"
         >
           <Plus size={24} />
         </button>
       </div>
-      
-      {/* Modals */}
+
       {showAddAccount && (
         <AddAccountModal
           newAccount={newAccount}
           setNewAccount={setNewAccount}
           onClose={() => setShowAddAccount(false)}
-          onSave={handleSaveNewAccount}
+          onSave={handleAddAccount}
         />
       )}
-      
       {showEditAccount && editAccount && (
-        <EditAccountModal
-          editAccount={editAccount}
-          setEditAccount={setEditAccount}
+        <AddAccountModal
+          newAccount={editAccount}
+          setNewAccount={setEditAccount}
           onClose={() => setShowEditAccount(false)}
-          onSave={handleSaveEdit}
+          onSave={handleEditAccount}
         />
       )}
-      
       {showDeleteAccount && deleteAccount && (
         <DeleteAccountModal
           account={deleteAccount}
           onClose={() => setShowDeleteAccount(false)}
-          onConfirm={handleConfirmDelete}
+          onConfirm={handleDeleteAccount}
         />
       )}
     </div>

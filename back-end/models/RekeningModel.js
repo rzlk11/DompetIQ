@@ -1,26 +1,39 @@
 import { Sequelize } from "sequelize";
-import db from "../config/database.js";
+import db from "../config/Database.js";
+import Users from "./UserModel.js";
 
 const { DataTypes } = Sequelize;
 
-const Rekening = db.define("Rekening", {
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
+const Rekening = db.define(
+  "rekening",
+  {
+    uuid: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    balance: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+      defaultValue: 0,
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   },
-  type: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  balance: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 0,
-  },
-  notes: {
-    type: DataTypes.TEXT,
-    allowNull: true,
-  },
-});
+  {
+    freezeTableName: true,
+  }
+);
+
+// Define the relationship between Rekening and Users
+Users.hasMany(Rekening, { foreignKey: "userId" });
+Rekening.belongsTo(Users, { foreignKey: "userId" });
 
 export default Rekening;

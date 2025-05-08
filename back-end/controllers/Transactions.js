@@ -2,11 +2,12 @@ import Transactions from "../models/TransactionModel.js";
 import { Sequelize, Op } from "sequelize";
 import Users from "../models/UserModel.js";
 import Categories from "../models/CategoryModel.js";
+import Rekening from "../models/RekeningModel.js";
 
 export const getTransactions = async (req, res) => {
   try {
     // Dapatkan parameter query
-    const { start_date, end_date, type, category_name } = req.query;
+    const { start_date, end_date, type, category, rekening } = req.query;
 
     // Buat kondisi where
     const where = {
@@ -42,12 +43,23 @@ export const getTransactions = async (req, res) => {
         attributes: [],
         where: {},
       },
+      {
+        model: Rekening,
+        attributes: [],
+        where: {},
+      },
     ];
 
     // Filter berdasarkan category_name
-    if (category_name) {
+    if (category) {
       include[1].where.name = {
-        [Op.like]: `%${category_name}%`, // Mencari nama kategori yang mengandung string
+        [Op.like]: `%${category}%`, // Mencari nama kategori yang mengandung string
+      };
+    }
+
+    if (rekening) {
+      include[2].where.name = {
+        [Op.like]: `%${rekening}%`, // Mencari nama rekening yang mengandung string
       };
     }
 
@@ -73,6 +85,7 @@ export const getTransactions = async (req, res) => {
         [Sequelize.literal("user.username"), "user"],
         [Sequelize.literal("category.name"), "category"],
         [Sequelize.literal("category.type"), "category_type"],
+        [Sequelize.literal("rekening.name"), "rekening"],
       ],
       include,
       raw: true,
@@ -104,7 +117,7 @@ export const getTransactionById = async (req, res) => {
   }
 };
 export const createTransaction = async (req, res) => {
-  const { amount, type, is_scheduled, category_name } = req.body;
+  const { amount, type, is_scheduled, category_name, rekening_name } = req.body;
   try {
     // 1. Cari kategori berdasarkan nama
     const category = await Categories.findOne({
@@ -127,8 +140,20 @@ export const createTransaction = async (req, res) => {
         msg: `Type transaksi tidak sesuai dengan kategori. Kategori ${category.name} hanya untuk ${category.type}`,
       });
     }
+
+    const rekening = await Rekening.findOne({
+      where: {
+        userId: req.userId,
+        name: rekening_name,
+      },
+    });
+    if (!rekening) {
+      return res.status(404).json({ msg: "Rekening tidak ditemukan" });
+    }
+
     await Transactions.create({
       amount: amount,
+      rekeningId: rekening.id,
       type: type,
       is_scheduled: is_scheduled,
       userId: req.userId,
@@ -140,7 +165,7 @@ export const createTransaction = async (req, res) => {
   }
 };
 export const updateTransaction = async (req, res) => {
-  const { amount, is_scheduled, type, category_name } = req.body;
+  const { amount, is_scheduled, type, category_name, rekening_name } = req.body;
 
   // Cari transaksi
   const transaction = await Transactions.findOne({
@@ -175,6 +200,20 @@ export const updateTransaction = async (req, res) => {
       }
     }
 
+    let rekeningId;
+    if (rekening_name) {
+      const rekening = await Rekening.findOne({
+        where: {
+          userId: req.userId,
+          name: rekening_name,
+        },
+      });
+      if (!rekening) {
+        return res.status(404).json({ msg: "Rekening tidak ditemukan" });
+      }
+      rekeningId = rekening.id;
+    }
+
     // Update data
     await Transactions.update(
       {
@@ -182,6 +221,7 @@ export const updateTransaction = async (req, res) => {
         is_scheduled: is_scheduled,
         type: type,
         categoryId: categoryId, // Akan undefined jika tidak diubah
+        rekeningId: rekeningId, // Akan undefined jika tidak diubah
       },
       {
         where: {

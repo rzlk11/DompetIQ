@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { getMe } from "../../features/authSlice";
 import { CalendarToday } from "@mui/icons-material";
@@ -12,6 +13,7 @@ import {
   Legend
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { current } from "@reduxjs/toolkit";
 
 // Register Chart.js components
 ChartJS.register(
@@ -26,6 +28,7 @@ ChartJS.register(
 const Waktu = () => {
   const dispatch = useDispatch();
   const [tipeData, setTipeData] = useState("PemasukanPengeluaran");
+  const [chartData, setChartData] = useState(null);
   
   // State untuk tanggal dalam format YYYY-MM-DD untuk komponen input type="date"
   const [dariTanggal, setDariTanggal] = useState("");
@@ -58,6 +61,15 @@ const Waktu = () => {
       window.removeEventListener('resize', checkIfMobile);
     };
   }, []);
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      const data = await getChartData();
+      setChartData(data);
+    };
+
+    fetchChartData();
+  }, [showReport]);
   
   // Fungsi untuk mengecek apakah layar mobile
   const checkIfMobile = () => {
@@ -178,56 +190,55 @@ const Waktu = () => {
   };
 
   // Mock data untuk chart - ini akan diganti dengan data dari API
-  const getChartData = () => {
-    // Generate sample dates for the selected period
-    const generateDates = () => {
-      const dates = [];
-      const startDate = new Date(dariTanggal);
-      const endDate = new Date(keTanggal);
-      
-      let currentDate = new Date(startDate);
-      while (currentDate <= endDate) {
-        // Format as MM/DD
-        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-        const day = String(currentDate.getDate()).padStart(2, '0');
-        dates.push(`${month}/${day}`);
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-      
-      return dates;
-    };
+  const getChartData = async () => {
+    try {
+      let response = await axios.get("http://localhost:5000/transactions", {
+        params: { start_date: dariTanggal, end_date: keTanggal },
+      });
 
-    const labels = generateDates();
-    
-    // Generate random transaction data with Rupiah-appropriate values (multiplied by 1000)
-    const transactions = labels.map(() => {
+      const transactionAmounts = response.data.map((transaction) => ({
+        amount:
+          transaction.category_type === "expense"
+            ? -Number(transaction.amount)
+            : Number(transaction.amount),
+      }));
+
+      const labels = response.data.map((transaction) =>
+        new Date(transaction.createdAt).toLocaleDateString("id-ID", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })
+      );
+
       if (tipeData === "PemasukanPengeluaran") {
-        // For income/expense, generate both positive and negative values
-        return Math.floor(Math.random() * 1500000) * (Math.random() > 0.5 ? 1 : -1);
+        return {
+          labels: labels,
+          datasets: [
+            {
+              label: "Transaksi",
+              data: transactionAmounts.map((t) => t.amount),
+              backgroundColor: function (context) {
+                const value = context.dataset.data[context.dataIndex];
+                return value < 0
+                  ? "rgba(255, 99, 132, 0.8)"
+                  : "rgba(75, 192, 92, 0.8)";
+              },
+              borderColor: function (context) {
+                const value = context.dataset.data[context.dataIndex];
+                return value < 0 ? "rgb(255, 99, 132)" : "rgb(75, 192, 92)";
+              },
+              borderWidth: 1,
+            },
+          ],
+        };
       } else {
-        // For balance, generate cumulative values
-        return Math.floor(Math.random() * 5000000);
+        return 0;
       }
-    });
-
-    return {
-      labels: labels,
-      datasets: [
-        {
-          label: tipeData === "PemasukanPengeluaran" ? 'Transaksi' : 'Saldo',
-          data: transactions,
-          backgroundColor: function(context) {
-            const value = context.dataset.data[context.dataIndex];
-            return value < 0 ? 'rgba(255, 99, 132, 0.8)' : 'rgba(75, 192, 92, 0.8)';
-          },
-          borderColor: function(context) {
-            const value = context.dataset.data[context.dataIndex];
-            return value < 0 ? 'rgb(255, 99, 132)' : 'rgb(75, 192, 92)';
-          },
-          borderWidth: 1
-        }
-      ]
-    };
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      throw error;
+    }
   };
 
   const chartOptions = {
@@ -287,8 +298,18 @@ const Waktu = () => {
 
   const renderChartResult = () => {
     if (!showReport) return null;
-    
-    const chartData = getChartData();
+
+      let totalPemasukan = chartData.datasets[0].data;
+      totalPemasukan = totalPemasukan
+        .filter((amount) => amount > 0)
+        .reduce((accumulator, currentValue) => accumulator + currentValue);
+      console.log("ini total pemasukan: ", totalPemasukan);
+
+      let totalPengeluaran = chartData.datasets[0].data;
+      totalPengeluaran = totalPengeluaran
+        .filter((amount) => amount < 0)
+        .reduce((accumulator, currentValue) => accumulator + currentValue);
+      console.log("ini total pengeluaran: ", totalPengeluaran);
     
     return (
       <div 
@@ -320,7 +341,7 @@ const Waktu = () => {
           }}>
             <span>Total Pemasukan:</span>
             <span style={{ fontWeight: "500", color: "#4CAF50" }}>
-              Rp {(2500000).toLocaleString()}
+              Rp {(totalPemasukan).toLocaleString()}
             </span>
           </div>
           
@@ -332,7 +353,7 @@ const Waktu = () => {
           }}>
             <span>Total Pengeluaran:</span>
             <span style={{ fontWeight: "500", color: "#F44336" }}>
-              Rp {(1200000).toLocaleString()}
+              Rp {(-totalPengeluaran).toLocaleString()}
             </span>
           </div>
           
@@ -344,7 +365,7 @@ const Waktu = () => {
           }}>
             <span>Selisih:</span>
             <span style={{ color: "#2196F3" }}>
-              Rp {(1300000).toLocaleString()}
+              Rp {(totalPemasukan-(-totalPengeluaran)).toLocaleString()}
             </span>
           </div>
         </div>

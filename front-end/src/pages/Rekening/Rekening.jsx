@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Plus, MoreVertical, X, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Plus, MoreVertical, X, ChevronDown } from "lucide-react";
 
 // Format currency helper
 const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('id-ID').format(Math.abs(amount));
+  return new Intl.NumberFormat("id-ID").format(Math.abs(amount));
 };
 
 // Account Card Component
@@ -15,7 +15,8 @@ const AccountCard = ({ account, onOpenMenu, menuOpen, onEdit, onDelete }) => {
         <div className="flex-1">
           <div className="font-medium text-gray-800">{account.name}</div>
           <div className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-            <span className="inline-block w-2 h-2 bg-gray-300 rounded-full"></span> {account.type}
+            <span className="inline-block w-2 h-2 bg-gray-300 rounded-full"></span>{" "}
+            {account.type}
           </div>
           {account.notes && (
             <div className="text-xs text-gray-600 mt-2 italic">
@@ -24,8 +25,12 @@ const AccountCard = ({ account, onOpenMenu, menuOpen, onEdit, onDelete }) => {
           )}
         </div>
         <div className="flex items-center">
-          <div className={`mr-3 text-right ${account.balance < 0 ? 'text-red-500' : 'text-green-600'} font-medium`}>
-            {account.balance < 0 ? '-' : ''}Rp {formatCurrency(account.balance)}
+          <div
+            className={`mr-3 text-right ${
+              account.balance < 0 ? "text-red-500" : "text-green-600"
+            } font-medium`}
+          >
+            {account.balance < 0 ? "-" : ""}Rp {formatCurrency(account.balance)}
           </div>
           <div className="relative">
             <button
@@ -65,21 +70,29 @@ const AddAccountModal = ({ newAccount, setNewAccount, onClose, onSave }) => {
     <div className="fixed inset-0  bg-opacity-30  flex items-center justify-center z-20 p-4 overflow-y-auto">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-auto animate-fadeIn">
         <div className="p-5">
-          <h2 className="text-xl font-bold mb-5 text-gray-800">Rekening Baru</h2>
+          <h2 className="text-xl font-bold mb-5 text-gray-800">
+            Rekening Baru
+          </h2>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1.5 text-gray-700">Nama</label>
+            <label className="block text-sm font-medium mb-1.5 text-gray-700">
+              Nama
+            </label>
             <input
               type="text"
               className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
               placeholder="Nama rekening"
               value={newAccount.name}
-              onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
+              onChange={(e) =>
+                setNewAccount({ ...newAccount, name: e.target.value })
+              }
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1.5 text-gray-700">Jumlah Awal</label>
+            <label className="block text-sm font-medium mb-1.5 text-gray-700">
+              Jumlah Awal
+            </label>
             <div className="flex items-center">
               <div className="flex-1 relative">
                 <input
@@ -87,7 +100,9 @@ const AddAccountModal = ({ newAccount, setNewAccount, onClose, onSave }) => {
                   className="w-full border border-gray-300 rounded-lg p-2.5 pl-10 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
                   placeholder="0"
                   value={newAccount.balance}
-                  onChange={(e) => setNewAccount({ ...newAccount, balance: e.target.value })}
+                  onChange={(e) =>
+                    setNewAccount({ ...newAccount, balance: e.target.value })
+                  }
                 />
                 <div className="absolute left-0 top-0 bottom-0 flex items-center pl-3">
                   <span className="text-gray-500">Rp</span>
@@ -97,13 +112,17 @@ const AddAccountModal = ({ newAccount, setNewAccount, onClose, onSave }) => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-1.5 text-gray-700">Catatan (Opsional)</label>
+            <label className="block text-sm font-medium mb-1.5 text-gray-700">
+              Catatan (Opsional)
+            </label>
             <textarea
               className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
               rows={3}
               placeholder="Tambahkan catatan..."
               value={newAccount.notes}
-              onChange={(e) => setNewAccount({ ...newAccount, notes: e.target.value })}
+              onChange={(e) =>
+                setNewAccount({ ...newAccount, notes: e.target.value })
+              }
             />
           </div>
 
@@ -133,7 +152,8 @@ const DeleteAccountModal = ({ account, onClose, onConfirm }) => {
       <div className="bg-white rounded-xl shadow-xl w-full max-w-sm mx-auto p-5">
         <h2 className="text-lg font-bold mb-4 text-gray-800">Hapus Rekening</h2>
         <p className="text-sm text-gray-600 mb-6">
-          Apakah Anda yakin ingin menghapus rekening <strong>{account.name}</strong>?
+          Apakah Anda yakin ingin menghapus rekening{" "}
+          <strong>{account.name}</strong>?
         </p>
         <div className="flex justify-end">
           <button
@@ -161,7 +181,11 @@ export default function Rekening() {
   const [showEditAccount, setShowEditAccount] = useState(false);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [menuOpen, setMenuOpen] = useState(null);
-  const [newAccount, setNewAccount] = useState({ name: '', balance: 0, notes: '' });
+  const [newAccount, setNewAccount] = useState({
+    name: "",
+    balance: "",
+    notes: "",
+  });
   const [editAccount, setEditAccount] = useState(null);
   const [deleteAccount, setDeleteAccount] = useState(null);
 
@@ -169,10 +193,10 @@ export default function Rekening() {
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/rekening');
+        const response = await axios.get("http://localhost:5000/rekening");
         setAccounts(response.data);
       } catch (error) {
-        console.error('Failed to fetch accounts:', error);
+        console.error("Failed to fetch accounts:", error);
       }
     };
     fetchAccounts();
@@ -180,12 +204,15 @@ export default function Rekening() {
 
   const handleAddAccount = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/rekening', newAccount);
+      const response = await axios.post(
+        "http://localhost:5000/rekening",
+        newAccount
+      );
       setAccounts([...accounts, response.data]);
       setShowAddAccount(false);
-      setNewAccount({ name: '', balance: 0, notes: '' });
+      setNewAccount({ name: "", balance: 0, notes: "" });
     } catch (error) {
-      console.error('Failed to add account:', error);
+      console.error("Failed to add account:", error);
     }
   };
 
@@ -199,22 +226,28 @@ export default function Rekening() {
           notes: editAccount.notes,
         }
       );
-      setAccounts(accounts.map(acc => (acc.uuid === editAccount.uuid ? response.data : acc)));
+      setAccounts(
+        accounts.map((acc) =>
+          acc.uuid === editAccount.uuid ? response.data : acc
+        )
+      );
       setShowEditAccount(false);
       setEditAccount(null);
     } catch (error) {
-      console.error('Failed to edit account:', error);
+      console.error("Failed to edit account:", error);
     }
   };
 
   const handleDeleteAccount = async () => {
     try {
-      await axios.delete(`http://localhost:5000/rekening/${deleteAccount.uuid}`);
-      setAccounts(accounts.filter(acc => acc.uuid !== deleteAccount.uuid));
+      await axios.delete(
+        `http://localhost:5000/rekening/${deleteAccount.uuid}`
+      );
+      setAccounts(accounts.filter((acc) => acc.uuid !== deleteAccount.uuid));
       setShowDeleteAccount(false);
       setDeleteAccount(null);
     } catch (error) {
-      console.error('Failed to delete account:', error);
+      console.error("Failed to delete account:", error);
     }
   };
 
@@ -227,12 +260,18 @@ export default function Rekening() {
           </div>
           <div className="text-right">
             <div className="text-sm font-medium">
-              Total: <span className="text-green-600 font-semibold">Rp {formatCurrency(accounts.reduce((sum, acc) => sum + acc.balance, 0))}</span>
+              Total:{" "}
+              <span className="text-green-600 font-semibold">
+                Rp{" "}
+                {formatCurrency(
+                  accounts.reduce((sum, acc) => sum + acc.balance, 0)
+                )}
+              </span>
             </div>
           </div>
         </div>
         <div className="space-y-3">
-          {accounts.map(account => (
+          {accounts.map((account) => (
             <AccountCard
               key={account.uuid}
               account={account}

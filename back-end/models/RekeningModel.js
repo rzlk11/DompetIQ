@@ -9,9 +9,11 @@ const Rekening = db.define(
   {
     uuid: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      defaultValue: Sequelize.UUIDV4,
       allowNull: false,
-      primaryKey: true,
+      validate: {
+        notEmpty: true,
+      },
     },
     name: {
       type: DataTypes.STRING,

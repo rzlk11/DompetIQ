@@ -29,6 +29,7 @@ const Waktu = () => {
   const dispatch = useDispatch();
   const [tipeData, setTipeData] = useState("PemasukanPengeluaran");
   const [chartData, setChartData] = useState(null);
+  const [accounts, setAccounts] = useState([]);
   
   // State untuk tanggal dalam format YYYY-MM-DD untuk komponen input type="date"
   const [dariTanggal, setDariTanggal] = useState("");
@@ -70,6 +71,20 @@ const Waktu = () => {
 
     fetchChartData();
   }, [showReport]);
+
+
+  useEffect(() => {
+    fetchAccounts();  
+  }, []);
+
+  const fetchAccounts = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/rekening');
+      setAccounts(response.data);
+    } catch (error) {
+      console.error('Failed to fetch accounts:', error);
+    }
+  }
   
   // Fungsi untuk mengecek apakah layar mobile
   const checkIfMobile = () => {
@@ -192,26 +207,25 @@ const Waktu = () => {
   // Mock data untuk chart - ini akan diganti dengan data dari API
   const getChartData = async () => {
     try {
-      let response = await axios.get("http://localhost:5000/transactions", {
-        params: { start_date: dariTanggal, end_date: keTanggal },
-      });
-
-      const transactionAmounts = response.data.map((transaction) => ({
-        amount:
-          transaction.category_type === "expense"
-            ? -Number(transaction.amount)
-            : Number(transaction.amount),
-      }));
-
-      const labels = response.data.map((transaction) =>
-        new Date(transaction.createdAt).toLocaleDateString("id-ID", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        })
-      );
-
       if (tipeData === "PemasukanPengeluaran") {
+        let response = await axios.get("http://localhost:5000/transactions", {
+          params: { start_date: dariTanggal, end_date: keTanggal },
+        });
+
+        const transactionAmounts = response.data.map((transaction) => ({
+          amount:
+            transaction.category_type === "expense"
+              ? -Number(transaction.amount)
+              : Number(transaction.amount),
+        }));
+
+        const labels = response.data.map((transaction) =>
+          new Date(transaction.createdAt).toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+        );
         return {
           labels: labels,
           datasets: [
@@ -233,7 +247,26 @@ const Waktu = () => {
           ],
         };
       } else {
-        return 0;
+        return {
+          labels: labels,
+          datasets: [
+            {
+              label: "Transaksi",
+              data: transactionAmounts.map((t) => t.amount),
+              backgroundColor: function (context) {
+                const value = context.dataset.data[context.dataIndex];
+                return value < 0
+                  ? "rgba(255, 99, 132, 0.8)"
+                  : "rgba(75, 192, 92, 0.8)";
+              },
+              borderColor: function (context) {
+                const value = context.dataset.data[context.dataIndex];
+                return value < 0 ? "rgb(255, 99, 132)" : "rgb(75, 192, 92)";
+              },
+              borderWidth: 1,
+            },
+          ],
+        };
       }
     } catch (error) {
       console.error("Error fetching transactions:", error);

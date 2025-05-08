@@ -165,27 +165,28 @@ export default function Rekening() {
   const [editAccount, setEditAccount] = useState(null);
   const [deleteAccount, setDeleteAccount] = useState(null);
 
+  const fetchAccounts = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/rekening');
+      setAccounts(response.data);
+    } catch (error) {
+      console.error('Failed to fetch accounts:', error);
+    }
+  };
   // Fetch accounts from backend
   useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/rekening');
-        setAccounts(response.data);
-      } catch (error) {
-        console.error('Failed to fetch accounts:', error);
-      }
-    };
     fetchAccounts();
   }, []);
 
   const handleAddAccount = async () => {
     try {
       const response = await axios.post('http://localhost:5000/rekening', newAccount);
-      setAccounts([...accounts, response.data]);
+      fetchAccounts();
       setShowAddAccount(false);
       setNewAccount({ name: '', balance: 0, notes: '' });
     } catch (error) {
       console.error('Failed to add account:', error);
+      fetchAccounts();
     }
   };
 
@@ -199,11 +200,12 @@ export default function Rekening() {
           notes: editAccount.notes,
         }
       );
-      setAccounts(accounts.map(acc => (acc.uuid === editAccount.uuid ? response.data : acc)));
+      fetchAccounts();
       setShowEditAccount(false);
       setEditAccount(null);
     } catch (error) {
       console.error('Failed to edit account:', error);
+      fetchAccounts();
     }
   };
 

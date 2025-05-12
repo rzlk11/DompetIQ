@@ -681,8 +681,7 @@ const Transaksi = () => {
                   <option value="">Pilih Rekening</option>
                   {rekenings.map((rekening) => (
                     <option key={rekening.uuid} value={rekening.name}>
-                      {rekening.name} (Saldo: {formatCurrency(rekening.balance)}
-                      )
+                      {rekening.name}
                     </option>
                   ))}
                 </select>

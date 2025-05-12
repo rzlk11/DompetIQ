@@ -1,32 +1,75 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { generatePDFReport } from './pdfGenerator';
+import axios from 'axios';
 
 function ExportPDF() {
-  const [formData, setFormData] = useState({
-    type: 'Laporan',
-    period: 'April 2025',
-    account: 'Semua Rekening',
-    includes: {
-      income: false,
-      expense: false,
-      accounts: false,
-      budget: false
+  
+    const months = [
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+
+    const today = new Date();
+    const currentPeriod = `${months[today.getMonth()]} ${today.getFullYear()}`;
+
+    const [formData, setFormData] = useState({
+      type: 'Laporan',
+      period: currentPeriod,
+      account: 'Semua Rekening',
+      includes: {
+        income: false,
+        expense: false,
+        accounts: false,
+        budget: false
+      }
+    });
+
+    const [daftarRekening, setDaftarRekening] = useState(["Semua Rekening"]);
+
+  useEffect(() => {
+    fetchAccounts();  
+  }, []);
+
+  const fetchAccounts = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/rekening');
+      setDaftarRekening(response.data);
+    } catch (error) {
+      console.error('Failed to fetch accounts:', error);
     }
-  });
-
-  const months = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-  ];
-
-  // Modified to only include 2025
-  const year = 2025;
+  }
 
   const handleExport = () => {
-    const doc = new jsPDF();
-    doc.text('Laporan Keuangan', 20, 20);
-    doc.save('laporan-keuangan.pdf');
+    if (!Object.values(formData.includes).some(value => value === true)) {
+      alert('Silakan pilih minimal satu jenis laporan untuk dimasukkan');
+      return;
+    }
+    
+    generatePDFReport(formData);
   };
+
+  const handleCheckboxChange = (field) => {
+    setFormData({
+      ...formData,
+      includes: {
+        ...formData.includes,
+        [field]: !formData.includes[field]
+      }
+    });
+  };
+
+  console.log(formData);
 
   return (
     <div className="max-w-md mx-auto bg-gray-50 min-h-screen relative shadow-lg md:my-6 md:min-h-0 md:rounded-xl">
@@ -60,7 +103,7 @@ function ExportPDF() {
               onChange={(e) => setFormData({...formData, period: e.target.value})}
             >
               {months.map(month => (
-                <option key={`${month}-${year}`}>{`${month} ${year}`}</option>
+                <option key={`${month}-${today.getFullYear()}`}>{`${month} ${today.getFullYear()}`}</option>
               ))}
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -78,9 +121,10 @@ function ExportPDF() {
               value={formData.account}
               onChange={(e) => setFormData({...formData, account: e.target.value})}
             >
-              <option>Semua Rekening</option>
-              <option>Gopay</option>
-              <option>Rekening Bank</option>
+              <option value="Semua Rekening">Semua Rekening</option>
+              {daftarRekening.map((rekening, index) => (
+                <option key={index} value={rekening.name}>{rekening.name}</option>
+              ))}
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
               <ChevronDown size={18} className="text-gray-500" />
@@ -97,10 +141,7 @@ function ExportPDF() {
                 type="checkbox"
                 className="w-4 h-4 text-green-500 border-gray-300 rounded"
                 checked={formData.includes.income}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  includes: {...formData.includes, income: e.target.checked}
-                })}
+                onChange={() => handleCheckboxChange('income')}
               />
               <span className="ml-2 text-sm text-gray-700">Pemasukan</span>
             </label>
@@ -110,10 +151,7 @@ function ExportPDF() {
                 type="checkbox"
                 className="w-4 h-4 text-green-500 border-gray-300 rounded"
                 checked={formData.includes.expense}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  includes: {...formData.includes, expense: e.target.checked}
-                })}
+                onChange={() => handleCheckboxChange('expense')}
               />
               <span className="ml-2 text-sm text-gray-700">Pengeluaran</span>
             </label>
@@ -123,10 +161,7 @@ function ExportPDF() {
                 type="checkbox"
                 className="w-4 h-4 text-green-500 border-gray-300 rounded"
                 checked={formData.includes.accounts}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  includes: {...formData.includes, accounts: e.target.checked}
-                })}
+                onChange={() => handleCheckboxChange('accounts')}
               />
               <span className="ml-2 text-sm text-gray-700">Rekening</span>
             </label>
@@ -136,10 +171,7 @@ function ExportPDF() {
                 type="checkbox"
                 className="w-4 h-4 text-green-500 border-gray-300 rounded"
                 checked={formData.includes.budget}
-                onChange={(e) => setFormData({
-                  ...formData,
-                  includes: {...formData.includes, budget: e.target.checked}
-                })}
+                onChange={() => handleCheckboxChange('budget')}
               />
               <span className="ml-2 text-sm text-gray-700">Anggaran</span>
             </label>

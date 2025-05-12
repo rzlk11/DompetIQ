@@ -87,6 +87,7 @@ export const getTransactions = async (req, res) => {
           [Sequelize.literal("category.type"), "category_type"],
           [Sequelize.literal("rekening.name"), "rekening"],
           [Sequelize.literal("rekening.balance"), "rekening_balance"],
+          [Sequelize.literal("rekening.uuid"), "rekening_uuid"],
         ],
         include,
         raw: true,
@@ -98,6 +99,7 @@ export const getTransactions = async (req, res) => {
         const id = tx.rekeningId;
         if (!grouped[id]) {
           grouped[id] = {
+            rekening_uuid: tx.rekening_uuid,
             rekeningId: id,
             rekening: tx.rekening,
             initialBalance: Number(tx.rekening_balance),
@@ -126,6 +128,8 @@ export const getTransactions = async (req, res) => {
             balance,
           };
         });
+
+        group.finalBalance = balance;
       }
 
       const result = Object.values(grouped);
@@ -321,5 +325,71 @@ export const deleteTransaction = async (req, res) => {
     res.status(200).json({ msg: "Transaksi berhasil dihapus" });
   } catch (error) {
     res.status(400).json({ msg: error.message });
+  }
+};
+
+export const getIncomeData = async (req) => {
+  try {
+    const incomeData = await Transactions.findAll({
+      where: {
+        userId: req.userId,
+        category_type: "income", // Filter for income transactions
+      },
+      attributes: [
+        "uuid",
+        "amount",
+        "createdAt",
+        [Sequelize.literal("category.type"), "category_type"],
+        [Sequelize.literal("rekening.name"), "rekening"],
+      ],
+      include: [
+        {
+          model: Categories,
+          attributes: [],
+        },
+        {
+          model: Rekening,
+          attributes: [],
+        },
+      ],
+      raw: true,
+    });
+    return incomeData;
+  } catch (error) {
+    console.error("Error fetching income data:", error);
+    throw new Error("Failed to fetch income data");
+  }
+};
+
+export const getExpenseData = async (req) => {
+  try {
+    const expenseData = await Transactions.findAll({
+      where: {
+        userId: req.userId,
+        category_type: "expense", // Filter for expense transactions
+      },
+      attributes: [
+        "uuid",
+        "amount",
+        "createdAt",
+        [Sequelize.literal("category.name"), "category"],
+        [Sequelize.literal("rekening.name"), "rekening"],
+      ],
+      include: [
+        {
+          model: Categories,
+          attributes: [],
+        },
+        {
+          model: Rekening,
+          attributes: [],
+        },
+      ],
+      raw: true,
+    });
+    return expenseData;
+  } catch (error) {
+    console.error("Error fetching expense data:", error);
+    throw new Error("Failed to fetch expense data");
   }
 };

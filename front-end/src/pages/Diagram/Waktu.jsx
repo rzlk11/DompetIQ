@@ -29,7 +29,6 @@ const Waktu = () => {
   const dispatch = useDispatch();
   const [tipeData, setTipeData] = useState("PemasukanPengeluaran");
   const [chartData, setChartData] = useState(null);
-  const [accounts, setAccounts] = useState([]);
   
   // State untuk tanggal dalam format YYYY-MM-DD untuk komponen input type="date"
   const [dariTanggal, setDariTanggal] = useState("");
@@ -40,7 +39,8 @@ const Waktu = () => {
   const [keTanggalDisplay, setKeTanggalDisplay] = useState("DD/MM/YY");
   
   const [periodeWaktu, setPeriodeWaktu] = useState("30 hari terakhir");
-  const [showKartuKredit, setShowKartuKredit] = useState(true);
+  const [rekening, setRekening] = useState("Semua Rekening");
+  const [daftarRekening, setDaftarRekening] = useState(["Semua Rekening"]);
   
   // State untuk menampilkan laporan
   const [showReport, setShowReport] = useState(false);
@@ -48,6 +48,11 @@ const Waktu = () => {
   
   // State untuk mendeteksi ukuran layar
   const [isMobile, setIsMobile] = useState(false);
+
+  const handleRekeningChange = (e) => {
+    setRekening(e.target.value);
+    setShowReport(false); // Sembunyikan laporan saat rekening berubah
+  };
 
   useEffect(() => {
     dispatch(getMe());
@@ -80,7 +85,7 @@ const Waktu = () => {
   const fetchAccounts = async () => {
     try {
       const response = await axios.get('http://localhost:5000/rekening');
-      setAccounts(response.data);
+      setDaftarRekening(response.data);
     } catch (error) {
       console.error('Failed to fetch accounts:', error);
     }
@@ -204,14 +209,21 @@ const Waktu = () => {
     }
   };
 
+  const isChartDataKosong = () => {
+    const labelsKosong =
+      chartData.labels.length === 0;
+    const nilaiKosong =
+      chartData.datasets[0].data.length === 0;
+    return labelsKosong && nilaiKosong;
+  };
+
   // Mock data untuk chart - ini akan diganti dengan data dari API
   const getChartData = async () => {
     try {
       if (tipeData === "PemasukanPengeluaran") {
         let response = await axios.get("http://localhost:5000/transactions", {
-          params: { start_date: dariTanggal, end_date: keTanggal },
+          params: { start_date: dariTanggal, end_date: keTanggal, rekening: (rekening === 'Semua Rekening' ? null : rekening) },
         });
-
         const transactionAmounts = response.data.map((transaction) => ({
           amount:
             transaction.category_type === "expense"
@@ -247,12 +259,88 @@ const Waktu = () => {
           ],
         };
       } else {
+        let response = await axios.get("http://localhost:5000/transactions", {
+          params: {
+            rekening: rekening === "Semua Rekening" ? null : rekening,
+            grouped: true,
+          },
+        });
+
+        const perAccountChanges = {};
+
+        response.data.forEach((rekening) => {
+          const accountName = rekening.rekening;
+          if (!perAccountChanges[accountName])
+            perAccountChanges[accountName] = {};
+
+          const sortedTx = rekening.transactions.sort(
+            (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+          );
+
+          sortedTx.forEach((t) => {
+            const date = new Date(t.createdAt).toLocaleDateString("id-ID", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            });
+
+            console.log(t.amount);
+            const signedAmount = +t.amount;
+            if (!perAccountChanges[accountName][date]) {
+              perAccountChanges[accountName][date] = 0;
+            }
+
+            perAccountChanges[accountName][date] += signedAmount;
+          });
+
+          // Optionally add initial balance to first transaction date
+          if (sortedTx.length > 0) {
+            const firstDate = new Date(
+              sortedTx[0].createdAt
+            ).toLocaleDateString("id-ID", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+            });
+
+            perAccountChanges[accountName][firstDate] =
+              (perAccountChanges[accountName][firstDate] || 0) +
+              rekening.initialBalance;
+          }
+        });
+        // Combine all dates across accounts
+        const allDatesSet = new Set();
+
+        Object.values(perAccountChanges).forEach((dateMap) => {
+          Object.keys(dateMap).forEach((date) => allDatesSet.add(date));
+        });
+
+        const allDates = Array.from(allDatesSet).sort((a, b) => {
+          const [d1, m1, y1] = a.split("/");
+          const [d2, m2, y2] = b.split("/");
+          return new Date(`${y1}-${m1}-${d1}`) - new Date(`${y2}-${m2}-${d2}`);
+        });
+
+        // Build labels
+        const labels = allDates;
+
+        // Build cumulative balance per date
+        const data = [];
+        let runningTotal = 0;
+
+        allDates.forEach((date) => {
+          for (const account in perAccountChanges) {
+            runningTotal += perAccountChanges[account][date] || 0;
+          }
+          data.push(runningTotal);
+        });
+
         return {
           labels: labels,
           datasets: [
             {
               label: "Transaksi",
-              data: transactionAmounts.map((t) => t.amount),
+              data: data,
               backgroundColor: function (context) {
                 const value = context.dataset.data[context.dataIndex];
                 return value < 0
@@ -283,7 +371,7 @@ const Waktu = () => {
       },
       title: {
         display: true,
-        text: 'TRANSACTIONS',
+        text: (tipeData === 'PemasukanPengeluaran' ? 'TRANSACTIONS' : 'ACCOUNT BALANCE'),
         font: {
           size: 18,
           weight: 'bold'
@@ -332,16 +420,36 @@ const Waktu = () => {
   const renderChartResult = () => {
     if (!showReport) return null;
 
+    if (isChartDataKosong()) {
+      return (
+        <div
+          ref={chartResultRef}
+          style={{
+            marginTop: "30px",
+            padding: "20px",
+            backgroundColor: "white",
+            borderRadius: "8px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+            textAlign: "center",
+            fontSize: "16px",
+            color: "#888",
+          }}
+        >
+          Tidak ada data transaksi untuk periode dan filter yang dipilih.
+        </div>
+      );
+    }
+
       let totalPemasukan = chartData.datasets[0].data;
       totalPemasukan = totalPemasukan
         .filter((amount) => amount > 0)
-        .reduce((accumulator, currentValue) => accumulator + currentValue);
+        .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
       console.log("ini total pemasukan: ", totalPemasukan);
 
       let totalPengeluaran = chartData.datasets[0].data;
       totalPengeluaran = totalPengeluaran
         .filter((amount) => amount < 0)
-        .reduce((accumulator, currentValue) => accumulator + currentValue);
+        .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
       console.log("ini total pengeluaran: ", totalPengeluaran);
     
     return (
@@ -585,10 +693,13 @@ const Waktu = () => {
                 width: isMobile ? "100%" : "300px",
                 backgroundColor: "white"
               }}
-              defaultValue="Semua Rekening"
+              value={rekening}
+              onChange={handleRekeningChange}
             >
               <option value="Semua Rekening">Semua Rekening</option>
-              <option value="Dompet">Dompet</option>
+              {daftarRekening.map((rekening, index) => (
+                <option key={index} value={rekening.name}>{rekening.name}</option>
+              ))}
             </select>
           </div>
 

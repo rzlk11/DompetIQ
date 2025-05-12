@@ -7,7 +7,8 @@ import Rekening from "../models/RekeningModel.js";
 export const getTransactions = async (req, res) => {
   try {
     // Dapatkan parameter query
-    const { start_date, end_date, type, category, rekening } = req.query;
+    const { start_date, end_date, type, category, rekening, grouped } =
+      req.query;
 
     // Buat kondisi where
     const where = {
@@ -68,29 +69,94 @@ export const getTransactions = async (req, res) => {
       include[1].where.type = type;
     }
 
-    const response = await Transactions.findAll({
-      where,
-      attributes: [
-        "uuid",
-        "amount",
-        "is_scheduled",
-        [
-          Sequelize.fn(
-            "DATE_FORMAT",
-            Sequelize.col("transactions.createdAt"),
-            "%Y-%m-%d %H:%i:%s"
-          ),
-          "createdAt", // Alias untuk kolom yang diformat
+    if (grouped) {
+      const response = await Transactions.findAll({
+        where,
+        attributes: [
+          "amount",
+          "is_scheduled",
+          "rekeningId",
+          [
+            Sequelize.fn(
+              "DATE_FORMAT",
+              Sequelize.col("transactions.createdAt"),
+              "%Y-%m-%d %H:%i:%s"
+            ),
+            "createdAt",
+          ],
+          [Sequelize.literal("category.type"), "category_type"],
+          [Sequelize.literal("rekening.name"), "rekening"],
+          [Sequelize.literal("rekening.balance"), "rekening_balance"],
         ],
-        [Sequelize.literal("user.username"), "user"],
-        [Sequelize.literal("category.name"), "category"],
-        [Sequelize.literal("category.type"), "category_type"],
-        [Sequelize.literal("rekening.name"), "rekening"],
-      ],
-      include,
-      raw: true,
-    });
-    res.status(200).json(response);
+        include,
+        raw: true,
+      });
+
+      // Step 1: Group by rekeningId
+      const grouped = {};
+      response.forEach((tx) => {
+        const id = tx.rekeningId;
+        if (!grouped[id]) {
+          grouped[id] = {
+            rekeningId: id,
+            rekening: tx.rekening,
+            initialBalance: Number(tx.rekening_balance),
+            transactions: [],
+          };
+        }
+        grouped[id].transactions.push(tx);
+      });
+
+      // Step 2: Sort & calculate running balance
+      for (const group of Object.values(grouped)) {
+        let balance = group.initialBalance;
+        group.transactions.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
+
+        group.transactions = group.transactions.map((tx) => {
+          const amount =
+            tx.category_type === "expense"
+              ? -Number(tx.amount)
+              : Number(tx.amount);
+          balance += amount;
+          return {
+            ...tx,
+            amount,
+            balance,
+          };
+        });
+      }
+
+      const result = Object.values(grouped);
+
+      res.status(200).json(result);
+    } else {
+      const response = await Transactions.findAll({
+        where,
+        attributes: [
+          "uuid",
+          "amount",
+          "is_scheduled",
+          [
+            Sequelize.fn(
+              "DATE_FORMAT",
+              Sequelize.col("transactions.createdAt"),
+              "%Y-%m-%d %H:%i:%s"
+            ),
+            "createdAt", // Alias untuk kolom yang diformat
+          ],
+          [Sequelize.literal("user.username"), "user"],
+          [Sequelize.literal("category.name"), "category"],
+          [Sequelize.literal("category.type"), "category_type"],
+          [Sequelize.literal("rekening.name"), "rekening"],
+          [Sequelize.literal("rekening.balance"), "rekening_balance"],
+        ],
+        include,
+        raw: true,
+      });
+      res.status(200).json(response);
+    }
   } catch (error) {
     res.status(400).json({ msg: error.message });
   }

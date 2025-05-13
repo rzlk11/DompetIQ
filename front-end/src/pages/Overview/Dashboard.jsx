@@ -174,8 +174,9 @@ const Dashboard = () => {
   const fetchAccounts = async () => {
     try {
       // Replace with your actual endpoint
-      const res = await axios.get("http://localhost:5000/dashboard/accounts", {
+      const res = await axios.get("http://localhost:5000/transactions", {
         withCredentials: true,
+        params: { grouped: true }
       });
       setAccounts(res.data || [
         // Fallback data (should be removed in production)
@@ -354,18 +355,17 @@ const Dashboard = () => {
             </div>
             <div className="space-y-4">
               {getLimitedAccounts().map((account) => (
-                <div key={account.id} className="flex items-center justify-between border-b pb-2">
+                <div className="flex items-center justify-between border-b pb-2">
                   <div className="flex items-center">
                     <div className="bg-gray-200 p-2 rounded-full mr-3">
                       <AccountBalance fontSize="small" style={{ color: 'black' }} />
                     </div>
                     <div>
-                      <div className="font-medium">{account.name}</div>
-                      <div className="text-xs text-gray-500">{account.accountNumber} • {account.type}</div>
+                      <div className="font-medium">{account.rekening}</div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-medium">Rp {account.balance.toLocaleString()}</div>
+                    <div className="font-medium">Rp {account.finalBalance.toLocaleString()}</div>
                   </div>
                 </div>
               ))}
